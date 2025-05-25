@@ -6,13 +6,13 @@ const optionButton = ({ texto, activo, onPress }: { texto: string, activo: boole
         <TouchableOpacity
             key={texto}
             onPress={() => onPress()}
-            className={`items-center justify-center px-4 py-2 h-10 w-50 rounded-full ${activo
+            className={`items-center justify-center px-12 py-3 rounded-full min-w-[100px] ${activo
                 ? 'bg-purple-500'
-                : 'border border-purple-500 '
+                : 'border border-purple-500'
                 }`}
         >
             <Text
-                className='text-white'
+                className='text-white font-bold'
             >
                 {texto}
             </Text>
