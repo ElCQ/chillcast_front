@@ -2,7 +2,7 @@ import { Icons } from '@/constants/icons'
 import React from 'react'
 import { Image, Text, View } from 'react-native'
 
-const StarRatingText = ({ rating }: { rating: number }) => {
+const StarRatingTextSm = ({ rating }: { rating: number }) => {
     return (
         <View className='flex-row items-center justify-center'>
             <Image
@@ -18,4 +18,21 @@ const StarRatingText = ({ rating }: { rating: number }) => {
     )
 }
 
-export default StarRatingText
+const StarRatingTextLg = ({ rating }: { rating: number }) => {
+    return (
+        <View className='flex-row items-center justify-center'>
+            <Image
+                source={Icons.StarIcon}
+                className='size-10'
+            />
+            <View className='flex-row items-end'>
+                <Text className='text-white font-bold text-xl'>{rating}</Text>
+                <Text className='text-gray-400 font-bold text-lg'>/5</Text>
+            </View>
+
+        </View>
+    )
+}
+
+export { StarRatingTextLg, StarRatingTextSm }
+

@@ -1,10 +1,11 @@
 import { Podcast } from '@/interfaces/interfaces';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import React from 'react';
 import { ImageBackground, Text, TouchableOpacity, View } from 'react-native';
-import StarRatingText from '../starRatingText';
+import { StarRatingTextSm } from '../starRatingText';
 
-const PodcastCard = ({data}: {data?: Podcast}) => {
+const PodcastCard = ({ data }: { data?: Podcast }) => {
     const id = '1234567890';
 
     return (
@@ -15,8 +16,10 @@ const PodcastCard = ({data}: {data?: Podcast}) => {
                     className='w-full h-full justify-end items-center'
                     resizeMode='cover'
                 >
-                    <View className='justify-between bg-black/60 px-2 py-1 w-full rounded-b-lg '>
-                        <View className='flex-row justify-between'>
+                    <LinearGradient
+                        colors={['transparent', 'rgba(0, 0, 0, 0.8)']} 
+                        className='rounded-lg p-2 h-full justify-end' >
+                        <View className='flex-row justify-between '>
                             <Text
                                 className='text-white text-lg font-bold'
                                 style={{
@@ -27,14 +30,14 @@ const PodcastCard = ({data}: {data?: Podcast}) => {
                             >
                                 PodCastCard
                             </Text>
-                            <StarRatingText rating={3.8} />
+                            <StarRatingTextSm rating={3.8} />
                         </View>
 
 
                         <Text className='text-[#CDCDCD]' numberOfLines={3}>
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                         </Text>
-                    </View>
+                    </LinearGradient>
 
                 </ImageBackground>
             </TouchableOpacity>

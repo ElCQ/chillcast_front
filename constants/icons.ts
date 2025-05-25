@@ -1,6 +1,8 @@
 import { ImageSourcePropType } from 'react-native';
 
-export type IconName = 'HomeIcon' | 'SearchIcon' | 'ProfileIcon' | 'MiEspacioIcon' | 'MagnifyingGlassIcon' | 'StarIcon' | 'FilterIcon';
+export type IconName = 
+'HomeIcon' | 'SearchIcon' | 'ProfileIcon' | 'MiEspacioIcon' | 'MagnifyingGlassIcon' | 
+'StarIcon' | 'FilterIcon' | 'ArrowBackIcon' | 'CirclePlusIcon' | 'FolderPlusIcon';
 
 export const Icons: Record<IconName, ImageSourcePropType> = Object.freeze({
     HomeIcon: require('../assets/icons/homeIcon.png'),
@@ -10,4 +12,7 @@ export const Icons: Record<IconName, ImageSourcePropType> = Object.freeze({
     MagnifyingGlassIcon: require('../assets/icons/magnifyingGlassIcon.png'),
     StarIcon: require('../assets/icons/starIcon.png'),
     FilterIcon: require('../assets/icons/filterIcon.png'),
+    ArrowBackIcon: require('../assets/icons/arrowBackIcon.png'),
+    CirclePlusIcon: require('../assets/icons/circlePlusIcon.png'),
+    FolderPlusIcon: require('../assets/icons/folderPlusIcon.png'),
 });
