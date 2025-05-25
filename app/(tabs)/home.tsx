@@ -19,10 +19,12 @@ const Home = () => {
         />
       </View>
 
-      <ScrollView className=' w-full h-full p-0 ' >
-        <CardContainer />
-        <CardContainer />
-        <CardContainer />
+      <ScrollView className='w-full h-full p-0' >
+        <View className='gap-5 pb-10'>
+          <CardContainer nombre='Recomendaciones del dia'/>
+          <CardContainer nombre='Según tus gustos' color='#5C0055'/>
+          <CardContainer nombre='Escuchar algo nuevo' color='#073120'/>
+        </View>
       </ScrollView>
 
     </View>

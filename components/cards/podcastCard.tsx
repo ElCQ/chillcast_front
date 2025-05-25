@@ -1,9 +1,10 @@
+import { Podcast } from '@/interfaces/interfaces';
 import { Link } from 'expo-router';
 import React from 'react';
 import { ImageBackground, Text, TouchableOpacity, View } from 'react-native';
 import StarRatingText from '../starRatingText';
 
-const PodcastCard = () => {
+const PodcastCard = ({data}: {data?: Podcast}) => {
     const id = '1234567890';
 
     return (
