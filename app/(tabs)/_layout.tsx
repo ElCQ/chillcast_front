@@ -20,8 +20,8 @@ const _Layout = () => {
     <Tabs screenOptions={{
       tabBarShowLabel: false,
       tabBarStyle: {
+        paddingTop: 10,   // tweak to align icon
         paddingBottom: 10,   // tweak to align icon
-        paddingTop: 10,      // optional
         backgroundColor: '#282828'
       },
     }}>
