@@ -204,6 +204,60 @@ const Search = () => {
         <FilterTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       </View>
 
+      <View className="w-full px-6 mt-2">
+        <Text className="text-white font-bold text-base mb-2">Filtros aplicados:</Text>
+        <View className="flex-row flex-wrap gap-2">
+          {sortOption && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">
+                {sortOption === 'DURATION' ? 'Duración' : sortOption}
+              </Text>
+            </View>
+          )}
+          {rating !== null && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">Calificación: {rating} ★</Text>
+            </View>
+          )}
+          {providers.length > 0 && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">Proveedores: {providers.join(', ')}</Text>
+            </View>
+          )}
+          {userRated && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">Calificado por mí</Text>
+            </View>
+          )}
+          {categories.length > 0 && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">Categorías: {categories.join(', ')}</Text>
+            </View>
+          )}
+          {releaseDate && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">Fecha: {releaseDate}</Text>
+            </View>
+          )}
+          {country && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">País: {country}</Text>
+            </View>
+          )}
+          {language && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">Idioma: {language}</Text>
+            </View>
+          )}
+          {duration && (
+            <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
+              <Text className="text-white text-sm">Duración: {duration}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+
       {/* MODAL DE FILTROS */}
       <Modal
         animationType="slide"
