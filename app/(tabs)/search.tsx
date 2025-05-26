@@ -1,8 +1,8 @@
 import FilterButton from '@/components/filterButton'
 import FilterTabs from '@/components/filterTabs'
 import SearchBar from '@/components/SearchBar'
-import { View, Modal, Text, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useState } from 'react'
+import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const Search = () => {
   const [modalVisible, setModalVisible] = useState(false)
@@ -19,6 +19,10 @@ const Search = () => {
   const [duration, setDuration] = useState<string | null>(null)
 
   const [expandedSections, setExpandedSections] = useState<string[]>([])
+
+  const tabs = ['Podcasts', 'Episodios', 'Hosts'];
+  const [activeTab, setActiveTab] = useState('Podcasts');
+  
 
   const toggleSection = (key: string) => {
     setExpandedSections(prev =>
@@ -197,7 +201,7 @@ const Search = () => {
       </View>
 
       <View className='w-full h-fit px-6 items-start justify-start'>
-        <FilterTabs />
+        <FilterTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       </View>
 
       {/* MODAL DE FILTROS */}
