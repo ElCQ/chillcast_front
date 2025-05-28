@@ -118,21 +118,41 @@ const Search = () => {
         )),
     },
     {
-      title: 'Categoría',
-      key: 'categories',
-      render: () =>
-        ['Instrumental', 'Vocal', 'Experimental'].map(option => (
-          <TouchableOpacity
-            key={option}
-            onPress={() => toggleMultipleSelect(categories, option, setCategories)}
-            className={`py-2 px-4 rounded mt-1 ${
-              categories.includes(option) ? 'bg-purple-600' : 'bg-[#1f1f1f]'
-            }`}
-          >
-            <Text className="text-white">{option}</Text>
-          </TouchableOpacity>
-        )),
-    },
+  title: 'Categoría',
+  key: 'categories',
+  render: () =>
+    [
+      'Noticias',
+      'Politica',
+      'Economia',
+      'Comedia',
+      'Educativo',
+      'Idiomas',
+      'Ciencias',
+      'Historia',
+      'Psicología',
+      'Tecnología',
+      'Cultura y sociedad',
+      'Salud y bienestar',
+      'Negocios',
+      'Cine y TV',
+      'Música',
+      'Deportes',
+      'Crímenes reales',
+      'Terror y Suspenso',
+      'Ficción'
+    ].map(option => (
+      <TouchableOpacity
+        key={option}
+        onPress={() => toggleMultipleSelect(categories, option, setCategories)}
+        className={`py-2 px-4 rounded mt-1 ${
+          categories.includes(option) ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+        }`}
+      >
+        <Text className="text-white">{option}</Text>
+      </TouchableOpacity>
+    )),
+},
     {
       title: 'Fecha de Lanzamiento',
       key: 'fecha',
