@@ -1,8 +1,11 @@
+import PodcastCard from '@/components/cards/podcastCard'
 import FilterButton from '@/components/filterButton'
 import FilterTabs from '@/components/filterTabs'
 import SearchBar from '@/components/SearchBar'
+import { fetchPodcasts } from '@/services/chillastApi'
+import useFetch from '@/services/useFetch'
 import React, { useState } from 'react'
-import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const Search = () => {
   const [modalVisible, setModalVisible] = useState(false)
@@ -23,6 +26,12 @@ const Search = () => {
   const tabs = ['Podcasts', 'Episodios', 'Hosts'];
   const [activeTab, setActiveTab] = useState('Podcasts');
   
+  const { data, loading, error } = useFetch(() =>
+    fetchPodcasts({ query: "podcast" })
+  );
+
+  const firstTwenty = data?.slice(0, 20);
+
 
   const toggleSection = (key: string) => {
     setExpandedSections(prev =>
@@ -191,37 +200,47 @@ const Search = () => {
   ]
 
   return (
-    <View className='bg-[#282828] flex-1 items-center justify-start gap-3 pt-20'>
-      <View className='px-6 w-full items-center justify-between gap-5'>
+    <View className="bg-[#282828] flex-1 items-center justify-start gap-3 pt-20">
+      <View className="px-6 w-full items-center justify-between gap-5">
         <SearchBar placeholder="Buscar" onPress={() => {}} />
       </View>
 
-      <View className='w-full h-10 px-6 items-start justify-start'>
+      <View className="w-full h-10 px-6 items-start justify-start">
         <FilterButton onPress={() => setModalVisible(true)} />
       </View>
 
-      <View className='w-full h-fit px-6 items-start justify-start'>
-        <FilterTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <View className="w-full h-fit px-6 items-start justify-start">
+        <FilterTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
       </View>
 
       <View className="w-full px-6 mt-2">
-        <Text className="text-white font-bold text-base mb-2">Filtros aplicados:</Text>
+        <Text className="text-white font-bold text-base mb-2">
+          Filtros aplicados:
+        </Text>
         <View className="flex-row flex-wrap gap-2">
           {sortOption && (
             <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
               <Text className="text-white text-sm">
-                {sortOption === 'DURATION' ? 'Duración' : sortOption}
+                {sortOption === "DURATION" ? "Duración" : sortOption}
               </Text>
             </View>
           )}
           {rating !== null && (
             <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
-              <Text className="text-white text-sm">Calificación: {rating} ★</Text>
+              <Text className="text-white text-sm">
+                Calificación: {rating} ★
+              </Text>
             </View>
           )}
           {providers.length > 0 && (
             <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
-              <Text className="text-white text-sm">Proveedores: {providers.join(', ')}</Text>
+              <Text className="text-white text-sm">
+                Proveedores: {providers.join(", ")}
+              </Text>
             </View>
           )}
           {userRated && (
@@ -231,7 +250,9 @@ const Search = () => {
           )}
           {categories.length > 0 && (
             <View className="bg-[#2e2e2e] px-3 py-1 rounded-full">
-              <Text className="text-white text-sm">Categorías: {categories.join(', ')}</Text>
+              <Text className="text-white text-sm">
+                Categorías: {categories.join(", ")}
+              </Text>
             </View>
           )}
           {releaseDate && (
@@ -257,6 +278,25 @@ const Search = () => {
         </View>
       </View>
 
+      <View className="py-3">
+        {loading ? (
+          <ActivityIndicator size="large" color="#fff" />
+        ) : error ? (
+          <Text className="text-red-400">{error.message}</Text>
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(item, index) => item._id || index.toString()}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: 'flex-start', alignItems: 'center' }}
+            renderItem={({ item }) => (
+              <View>
+                <PodcastCard data={item} />
+              </View>
+            )}
+          />
+        )}
+      </View>
 
       {/* MODAL DE FILTROS */}
       <Modal
@@ -265,16 +305,41 @@ const Search = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#121212', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' }}>
-            <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#333', flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "flex-end",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#121212",
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              maxHeight: "90%",
+            }}
+          >
+            <View
+              style={{
+                padding: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: "#333",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
               <View style={{ width: 50 }}>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Text style={{ color: 'white', fontSize: 18 }}>{'<'}</Text>
+                  <Text style={{ color: "white", fontSize: 18 }}>{"<"}</Text>
                 </TouchableOpacity>
               </View>
-              <View style={{ flex: 1, alignItems: 'center' }}>
-                <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>Filtros</Text>
+              <View style={{ flex: 1, alignItems: "center" }}>
+                <Text
+                  style={{ color: "white", fontSize: 18, fontWeight: "bold" }}
+                >
+                  Filtros
+                </Text>
               </View>
               <View style={{ width: 50 }} />
             </View>
@@ -286,60 +351,104 @@ const Search = () => {
               }}
               showsVerticalScrollIndicator={true}
             >
-              {filterSections.map(section => {
-                const isExpanded = expandedSections.includes(section.key)
+              {filterSections.map((section) => {
+                const isExpanded = expandedSections.includes(section.key);
                 return (
                   <View key={section.key} style={{ marginTop: 24 }}>
                     <TouchableOpacity
                       onPress={() => toggleSection(section.key)}
-                      style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
                     >
-                      <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>{section.title}</Text>
-                      <Text style={{ color: 'white', fontSize: 20 }}>{isExpanded ? '˄' : '>'}</Text>
+                      <Text
+                        style={{
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 16,
+                        }}
+                      >
+                        {section.title}
+                      </Text>
+                      <Text style={{ color: "white", fontSize: 20 }}>
+                        {isExpanded ? "˄" : ">"}
+                      </Text>
                     </TouchableOpacity>
 
                     {isExpanded && (
-                      <View style={{ marginTop: 8 }}>
-                        {section.render()}
-                      </View>
+                      <View style={{ marginTop: 8 }}>{section.render()}</View>
                     )}
                   </View>
-                )
+                );
               })}
 
               {/* Botones */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 32, gap: 8 }}>
-                <TouchableOpacity style={{ flex: 1, backgroundColor: '#7c3aed', padding: 12, borderRadius: 8 }}>
-                  <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Aplicar</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 32,
+                  gap: 8,
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#7c3aed",
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Aplicar
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    setSortOption('alphabetical')
-                    setSelectedGenre(null)
-                    setRating(null)
-                    setProviders([])
-                    setUserRated(null)
-                    setCategories([])
-                    setReleaseDate(null)
-                    setCountry(null)
-                    setLanguage(null)
-                    setDuration(null)
-                    setExpandedSections([])
+                    setSortOption("alphabetical");
+                    setSelectedGenre(null);
+                    setRating(null);
+                    setProviders([]);
+                    setUserRated(null);
+                    setCategories([]);
+                    setReleaseDate(null);
+                    setCountry(null);
+                    setLanguage(null);
+                    setDuration(null);
+                    setExpandedSections([]);
                   }}
-                  style={{ flex: 1, backgroundColor: '#333', padding: 12, borderRadius: 8 }}
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#333",
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
                 >
-                  <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Restablecer</Text>
+                  <Text
+                    style={{
+                      color: "white",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Restablecer
+                  </Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
         </View>
       </Modal>
-
-
-
     </View>
-  )
+  );
 }
 
 export default Search
