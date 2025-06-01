@@ -3,74 +3,103 @@ import BackButton from '@/components/buttons/backButton';
 import FilterTabs from '@/components/filterTabs';
 import { StarRatingTextLg } from '@/components/starRatingText';
 import { Icons } from '@/constants/icons';
+import { fetchUniquePodcast } from '@/services/chillastApi';
+import useFetch from '@/services/useFetch';
 import { hexToRgba } from '@/utils/colorUtils';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { ImageBackground, ScrollView, Text, View } from 'react-native';
+import { ImageBackground, Text, View } from 'react-native';
+import Episodios from './episodios';
+import Informacion from './informacion';
+import Reseñas from './reseñas';
 
 const Podcasts = () => {
   const { id } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState('Información');
-
   const tabs = ['Información', 'Episodios', 'Reseñas'];
 
-  return (
-    <View className='flex-1 items-center justify-top bg-[#282828]'>
+  const { data, loading, error } = useFetch(() =>
+    fetchUniquePodcast({ id: id })
+  );
+
+  
+  return loading ? (
+    <View className="flex-1 items-center justify-center bg-[#282828]">
+      <Text className="text-white text-lg">Cargando...</Text>
+    </View>
+  ) : error ? (
+    <View className="flex-1 items-center justify-center bg-[#282828]">
+      <Text className="text-red-400 text-lg">{error.message}</Text>
+    </View>
+  ) : data ? (
+    <View className="flex-1 items-center justify-top bg-[#282828]">
       <ImageBackground
-        source={require('../../assets/images/podcastImage.png')}
-        className='w-full h-72 justify-end items-center'
-        resizeMode='cover'
+        source={{ uri: data?.image || "https://via.placeholder.com/180x280" }}
+        className="w-full h-72 justify-end items-center"
+        resizeMode="cover"
       >
         <LinearGradient
           colors={[
-            hexToRgba('#282828', 0.4),
-            hexToRgba('#282828', 0.4),
-            '#282828'
+            hexToRgba("#282828", 0.4),
+            hexToRgba("#282828", 0.4),
+            "#282828",
           ]}
-          className='rounded-lg px-5 pt-12 pb-8 w-full h-full justify-between gap-3'
+          className="rounded-lg px-5 pt-12 pb-8 w-full h-full justify-between gap-3"
         >
-          <View className='gap-3'>
+          <View className="gap-3">
             <BackButton />
 
-            <View className='flex-row justify-between'>
-
-              <Text className='text-white text-5xl font-semibold' style={{
-                textShadowColor: '#111',
-                textShadowOffset: { width: 0, height: 2 },
-                textShadowRadius: 10,
-              }}>
-                El Podcast
-
+            <View className="flex-row justify-between">
+              <Text
+                className="text-white text-3xl flex-1 font-semibold"
+                style={{
+                  textShadowColor: "#111",
+                  textShadowOffset: { width: 0, height: 2 },
+                  textShadowRadius: 10,
+                }}
+              >
+                {data?.title || "Podcast Title"}
               </Text>
 
               <StarRatingTextLg rating={3.8} />
             </View>
-
           </View>
 
-          <View className='flex-row items-center justify-start gap-5'>
-            <AddButton label='Añadir a favoritos' icon={Icons.CirclePlusIcon} onPress={() => console.log("Añadido a favoritos")} />
-            <AddButton label='Añadir a lista' icon={Icons.FolderPlusIcon} onPress={() => console.log("Añadido a favoritos")} />
+          <View className="flex-row items-center justify-start gap-5">
+            <AddButton
+              label="Añadir a favoritos"
+              icon={Icons.CirclePlusIcon}
+              onPress={() => console.log("Añadido a favoritos")}
+            />
+            <AddButton
+              label="Añadir a lista"
+              icon={Icons.FolderPlusIcon}
+              onPress={() => console.log("Añadido a favoritos")}
+            />
           </View>
-
         </LinearGradient>
-
       </ImageBackground>
 
-      <ScrollView horizontal className='mt-8' 
-      showsHorizontalScrollIndicator={false} 
-      contentContainerStyle={{ paddingHorizontal: 20 }}
-      >
-        
-        <FilterTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}/>
+      <View className="w-full h-fit px-6 my-2 items-start justify-start">
+        <FilterTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </View>
 
-      </ScrollView>
-
-
-      <Text>ID: {id}</Text>
+      <View className="flex-1 w-full">
+        {activeTab === "Información" && <Informacion data={data} />}
+        {activeTab === "Episodios" && <Episodios data={data} />}
+        {activeTab === "Reseñas" && <Reseñas data={data} />}
+      </View>
     </View>
-  )
+  ) : (
+    <View className="flex-1 items-center justify-center bg-[#282828]">
+      <Text className="text-red-400 text-lg">No se encontró el podcast</Text>
+    </View>
+  );
 }
 
 export default Podcasts

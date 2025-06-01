@@ -1,8 +1,8 @@
+import { Icons } from '@/constants/icons';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
-import { Icons } from '@/constants/icons';
 
-const FilterButton = ({ onPress }) => {
+const FilterButton = ({ onPress }: {onPress: () => void}) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <View className='flex-row items-center gap-2'>
