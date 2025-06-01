@@ -31,5 +31,6 @@ export default function RootLayout() {
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     <Stack.Screen name="podcast/[id]" options={{ headerShown: false }} />
     <Stack.Screen name="episodio/[id]" options={{ headerShown: false }} />
+    <Stack.Screen name="listas/[id]" options={{ headerShown: false }} />
   </Stack>;
 }
