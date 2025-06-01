@@ -4,7 +4,7 @@ import FilterTabs from '@/components/filterTabs'
 import SearchBar from '@/components/SearchBar'
 import { fetchPodcasts } from '@/services/chillastApi'
 import useFetch from '@/services/useFetch'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const Search = () => {
@@ -25,13 +25,23 @@ const Search = () => {
 
   const tabs = ['Podcasts', 'Episodios', 'Hosts'];
   const [activeTab, setActiveTab] = useState('Podcasts');
+
+  const [search, setSearch] = useState<string>('');
+  const flatListRef = useRef<FlatList>(null);
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+  };
+
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset({ offset: 0, animated: true });
+    }
+  }, [search]);
   
   const { data, loading, error } = useFetch(() =>
     fetchPodcasts({ query: "podcast" })
   );
-
-  const firstTwenty = data?.slice(0, 20);
-
 
   const toggleSection = (key: string) => {
     setExpandedSections(prev =>
@@ -222,7 +232,7 @@ const Search = () => {
   return (
     <View className="bg-[#282828] flex-1 items-center justify-start gap-3 pt-20">
       <View className="px-6 w-full items-center justify-between gap-5">
-        <SearchBar placeholder="Buscar" onPress={() => {}} />
+        <SearchBar placeholder="Buscar" onSubmit={handleSearch} />
       </View>
 
       <View className="w-full h-10 px-6 items-start justify-start">
@@ -303,17 +313,43 @@ const Search = () => {
           <ActivityIndicator size="large" color="#fff" />
         ) : error ? (
           <Text className="text-red-400">{error.message}</Text>
+        ) : !data || data.length === 0 ? (
+          <Text className="text-white">No hay resultados para tu búsqueda</Text>
         ) : (
           <FlatList
-            data={data}
+            ref={flatListRef}
+            data={
+              search
+                ? data.filter(
+                    (podcast) =>
+                      podcast.title
+                        .toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                      (podcast.description &&
+                        podcast.description
+                          .toLowerCase()
+                          .includes(search.toLowerCase()))
+                  )
+                : data
+            }
             keyExtractor={(item, index) => item._id || index.toString()}
             numColumns={2}
-            columnWrapperStyle={{ justifyContent: 'flex-start', alignItems: 'center' }}
+            columnWrapperStyle={{
+              justifyContent: "flex-start",
+              alignItems: "center",
+            }}
+            contentContainerStyle={{ paddingBottom: 300, paddingTop: 10 }}
             renderItem={({ item }) => (
               <View>
                 <PodcastCard data={item} />
               </View>
             )}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <Text className="text-white text-center">
+                No hay resultados para tu búsqueda
+              </Text>
+            }
           />
         )}
       </View>

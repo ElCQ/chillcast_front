@@ -1,32 +1,31 @@
-import AddButton from '@/components/buttons/addButton';
-import BackButton from '@/components/buttons/backButton';
-import FilterTabs from '@/components/filterTabs';
-import { StarRatingTextLg } from '@/components/starRatingText';
-import { Icons } from '@/constants/icons';
-import { fetchUniquePodcast } from '@/services/chillastApi';
-import useFetch from '@/services/useFetch';
-import { hexToRgba } from '@/utils/colorUtils';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
-import { ImageBackground, Text, View } from 'react-native';
-import Episodios from './episodios';
-import Informacion from './informacion';
-import Reseñas from './reseñas';
+import AddButton from "@/components/buttons/addButton";
+import BackButton from "@/components/buttons/backButton";
+import FilterTabs from "@/components/filterTabs";
+import { StarRatingTextLg } from "@/components/starRatingText";
+import { Icons } from "@/constants/icons";
+import { fetchUniquePodcast } from "@/services/chillastApi";
+import useFetch from "@/services/useFetch";
+import { hexToRgba } from "@/utils/colorUtils";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import { ActivityIndicator, ImageBackground, Text, View } from "react-native";
+import Episodios from "./episodios";
+import Informacion from "./informacion";
+import Reseñas from "./reseñas";
 
 const Podcasts = () => {
   const { id } = useLocalSearchParams();
-  const [activeTab, setActiveTab] = useState('Información');
-  const tabs = ['Información', 'Episodios', 'Reseñas'];
+  const [activeTab, setActiveTab] = useState("Información");
+  const tabs = ["Información", "Episodios", "Reseñas"];
 
   const { data, loading, error } = useFetch(() =>
     fetchUniquePodcast({ id: id })
   );
 
-  
   return loading ? (
     <View className="flex-1 items-center justify-center bg-[#282828]">
-      <Text className="text-white text-lg">Cargando...</Text>
+      <ActivityIndicator size="large" color="#fff" />
     </View>
   ) : error ? (
     <View className="flex-1 items-center justify-center bg-[#282828]">
@@ -91,7 +90,7 @@ const Podcasts = () => {
 
       <View className="flex-1 w-full">
         {activeTab === "Información" && <Informacion data={data} />}
-        {activeTab === "Episodios" && <Episodios data={data} />}
+        {activeTab === "Episodios" && <Episodios dataPodcast={data} />}
         {activeTab === "Reseñas" && <Reseñas data={data} />}
       </View>
     </View>
@@ -100,6 +99,6 @@ const Podcasts = () => {
       <Text className="text-red-400 text-lg">No se encontró el podcast</Text>
     </View>
   );
-}
+};
 
-export default Podcasts
+export default Podcasts;

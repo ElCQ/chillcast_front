@@ -1,16 +1,17 @@
-import CardContainer from '@/components/cardContainer'
-import SearchBar from '@/components/SearchBar'
-import { fetchPodcasts } from '@/services/chillastApi'
-import useFetch from '@/services/useFetch'
-import { useRouter } from 'expo-router'
-import React from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import CardContainer from "@/components/cardContainer";
+import SearchBar from "@/components/SearchBar";
+import { fetchPodcasts } from "@/services/chillastApi";
+import useFetch from "@/services/useFetch";
+import { useRouter } from "expo-router";
+import React from "react";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
 const Home = () => {
-
   const router = useRouter();
 
-  const {data, loading, error} = useFetch(() => fetchPodcasts({query: 'podcast'}));
+  const { data, loading, error } = useFetch(() =>
+    fetchPodcasts({ query: "podcast" })
+  );
 
   const firstTen = data?.slice(0, 10);
 
@@ -22,14 +23,18 @@ const Home = () => {
           placeholder="Buscar"
           onPress={() => router.push("/search")}
         />
-      </View> 
+      </View>
 
       <ScrollView className="w-full h-full p-0">
         <View className="gap-5 pb-10">
           {loading ? (
-            <Text className="text-white text-center mt-10">Cargando...</Text>
+            <View className="flex-1 items-center justify-center bg-[#282828]">
+              <ActivityIndicator size="large" color="#fff" />
+            </View>
           ) : error ? (
-            <Text className="text-red-400 text-center mt-10">{error.message}</Text>
+            <Text className="text-red-400 text-center mt-10">
+              {error.message}
+            </Text>
           ) : (
             <>
               <CardContainer
@@ -53,11 +58,11 @@ const Home = () => {
                 color="#073120"
               />
             </>
-           )}
+          )}
         </View>
       </ScrollView>
     </View>
   );
-}
+};
 
-export default Home
+export default Home;

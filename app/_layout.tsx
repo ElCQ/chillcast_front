@@ -1,7 +1,7 @@
-import { Stack, SplashScreen } from "expo-router";
-import '../global.css';
-import { useFonts, Inter_400Regular, Inter_700Bold } from "@expo-google-fonts/inter";
+import { Inter_400Regular, Inter_700Bold, useFonts } from "@expo-google-fonts/inter";
+import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
+import '../global.css';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -30,5 +30,6 @@ export default function RootLayout() {
     <Stack.Screen name="(auth)/generosIniciales" options={{ headerShown: false }} />
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     <Stack.Screen name="podcast/[id]" options={{ headerShown: false }} />
+    <Stack.Screen name="episodio/[id]" options={{ headerShown: false }} />
   </Stack>;
 }
