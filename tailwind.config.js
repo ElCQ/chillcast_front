@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        inter: ["Inter_400Regular"],
+        inter: ["Inter_400Regular"]},
       colors: {
         primary: "#040025",
         secondary: "#151312",
