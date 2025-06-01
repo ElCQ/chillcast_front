@@ -22,7 +22,7 @@ export default function RootLayout() {
            animation: 'fade',
            contentStyle: {
              backgroundColor: "#282828",
-           }, // 👈 tu color de fondo global
+           },
      }}>
     <Stack.Screen name="(auth)/index" options={{ headerShown: false }} />
     <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />

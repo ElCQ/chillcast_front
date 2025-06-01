@@ -1,33 +1,18 @@
 import { useRouter } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
-import {View, Text, TouchableOpacity, ScrollView, Animated,} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
 
 const GENRES = [
-    'Noticias',
-    'Politica',
-    'Economia',
-    'Comedia',
-    'Educativo',
-    'Idiomas',
-    'Ciencias',
-    'Historia',
-    'Psicología',
-    'Tecnología',
-    'Cultura y sociedad',
-    'Salud y bienestar',
-    'Negocios',
-    'Cine y TV',
-    'Música',
-    'Deportes',
-    'Crímenes reales',
-    'Terror y Suspenso',
-    'Ficción'
+    'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
+    'Idiomas', 'Ciencias', 'Historia', 'Psicología', 'Tecnología',
+    'Cultura y sociedad', 'Salud y bienestar', 'Negocios', 'Cine y TV',
+    'Música', 'Deportes', 'Crímenes reales', 'Terror y Suspenso', 'Ficción'
 ];
-
 
 export default function WelcomeScreen() {
     const router = useRouter();
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+    const [error, setError] = useState(false);
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -39,32 +24,42 @@ export default function WelcomeScreen() {
     }, []);
 
     const toggleGenre = (genre: string) => {
-        setSelectedGenres((prev) =>
-            prev.includes(genre)
-                ? prev.filter((g) => g !== genre)
-                : [...prev, genre]
-        );
+        setSelectedGenres((prev) => {
+            setError(false); // limpiamos el error si toca algo
+            if (prev.includes(genre)) {
+                return prev.filter((g) => g !== genre);
+            } else if (prev.length < 5) {
+                return [...prev, genre];
+            } else {
+                return prev;
+            }
+        });
     };
 
     const handleContinue = () => {
-        // Más adelante: enviar selectedGenres al backend
+        if (selectedGenres.length === 0) {
+            setError(true);
+            return;
+        }
+
         console.log('Enviar al back:', selectedGenres);
-        // router.push('/home') o donde vayas después
+        router.push('/(tabs)/home');
     };
 
     return (
         <Animated.View
-            style={{ flex: 1, backgroundColor: '#121212', opacity: fadeAnim }}
-            className="px-6 justify-center"
+            style={{ flex: 1, opacity: fadeAnim }}
+            className="bg-background px-6 pt-20 pb-20"
         >
             <Text className="text-white text-3xl font-bold mb-2 text-center">¡Bienvenido!</Text>
-            <Text className="text-white text-lg mb-6 text-center">
-                Elegí los géneros que te interesan
+            <Text className="text-white mb-10 text-center text-sm">
+                Elegí los géneros que te interesan (máximo 5)
             </Text>
 
             <ScrollView
                 contentContainerStyle={{ flexWrap: 'wrap', flexDirection: 'row' }}
                 className="mb-6"
+                showsVerticalScrollIndicator={false}
             >
                 {GENRES.map((genre) => {
                     const isSelected = selectedGenres.includes(genre);
@@ -82,11 +77,17 @@ export default function WelcomeScreen() {
                 })}
             </ScrollView>
 
+            {error && (
+                <Text className="text-red-400 text-center mb-4 font-inter">
+                    Debe seleccionar al menos un género
+                </Text>
+            )}
+
             <TouchableOpacity
-                onPress={() => router.push('//(tabs)/home)')}
+                onPress={handleContinue}
                 className="bg-purple-600 py-3 rounded-full"
             >
-                <Text className="text-white text-center font-semibold">Continuar</Text>
+                <Text className="text-white text-center font-semibold">Registrarse</Text>
             </TouchableOpacity>
         </Animated.View>
     );
