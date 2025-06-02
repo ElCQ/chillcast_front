@@ -3,7 +3,7 @@ import BackButton from '@/components/buttons/backButton';
 import FilterTabs from '@/components/filterTabs';
 import { StarRatingTextLg } from '@/components/starRatingText';
 import { Icons } from '@/constants/icons';
-import { fetchEpisodeById } from '@/services/chillastApi';
+import { mockFetchEpisodeById } from '@/services/mockService';
 import useFetch from '@/services/useFetch';
 import { hexToRgba } from '@/utils/colorUtils';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,7 +20,7 @@ const Episodio = () => {
 
 
     const { data, loading, error } = useFetch(() =>
-      fetchEpisodeById({ id: id })
+      mockFetchEpisodeById({ id: id })
     );
 
     return loading ? (

@@ -2,7 +2,7 @@ import EpisodioCard from "@/components/cards/episodioCard";
 import FilterButton from "@/components/filterButton";
 import SearchBar from "@/components/SearchBar";
 import { Podcast } from "@/interfaces/interfaces";
-import { fetchEpisodes } from "@/services/chillastApi";
+import { mockFetchEpisodes } from "@/services/mockService";
 import useFetch from "@/services/useFetch";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
@@ -11,7 +11,7 @@ const Episodios = ({ dataPodcast }: { dataPodcast: Podcast }) => {
   const [search, setSearch] = useState<string>("");
 
   const { data, loading, error } = useFetch(() =>
-    fetchEpisodes({ id: dataPodcast._id })
+    mockFetchEpisodes({ id: dataPodcast._id })
   );
 
   const handleSearch = (value: string) => {
