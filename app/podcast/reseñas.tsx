@@ -1,42 +1,49 @@
+import SearchBar from '@/components/SearchBar';
+import ReseñaCard from '@/components/cards/reseñaCard';
+import FilterButton from '@/components/filterButton';
+import { Podcast } from '@/interfaces/interfaces';
 import React, { useState } from 'react';
 import {
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+  View
 } from 'react-native';
-import SearchBar from '@/components/SearchBar';
-import FilterButton from '@/components/filterButton';
 
-const Reseñas = ({ id }: { id: string }) => {
-  const [search, setSearch] = useState('');
+const Reseñas = ({ data }: { data: Podcast }) => {
+  const [search, setSearch] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [rating, setRating] = useState<number>(3);
-  const [comment, setComment] = useState<string>('');
+  const [comment, setComment] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
 
   const reseñas = [
     {
-      id: 1,
-      nombre: 'Juan Pérez',
+      _id: "1",
+      nombre: "Juan Pérez",
       valoracion: 4.7,
-      texto: 'Excelente podcast, lo escucho todos los días.',
+      texto: "Excelente podcast, lo escucho todos los días.",
     },
     {
-      id: 2,
-      nombre: 'Ana Gómez',
+      _id: "2",
+      nombre: "Ana Gómez",
       valoracion: 5,
-      texto: 'Muy recomendable, excelente contenido.',
+      texto: "Muy recomendable, excelente contenido.",
     },
     {
-      id: 3,
-      nombre: 'Carlos López',
+      _id: "3",
+      nombre: "Carlos López",
       valoracion: 3.5,
-      texto: 'Está bien, pero podría mejorar.',
+      texto: "Está bien, pero podría mejorar.",
+    },
+    {
+      _id: "4",
+      nombre: "Carlos López",
+      valoracion: 3.5,
+      texto: "Está bien, pero podría mejorar.",
     },
   ];
 
@@ -47,39 +54,41 @@ const Reseñas = ({ id }: { id: string }) => {
   );
 
   const handleSubmit = () => {
-    if (comment.trim() === '') {
+    if (comment.trim() === "") {
       setError(true);
     } else {
       setError(false);
-      console.log('ID asociado:', id);
-      console.log('Rating:', rating);
-      console.log('Comentario:', comment);
-      setComment('');
+      console.log("ID asociado:", data._id);
+      console.log("Rating:", rating);
+      console.log("Comentario:", comment);
+      setComment("");
       setRating(3);
       setMostrarFormulario(false);
     }
   };
 
-  const fechaActual = new Date().toLocaleDateString('es-ES');
+  const fechaActual = new Date().toLocaleDateString("es-ES");
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 12, gap: 12 }}>
+    <View className="flex-1 px-3 gap-3">
       {mostrarFormulario ? (
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1"
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-            <View style={styles.formContainer}>
-              <Text style={styles.date}>Fecha de calificación: {fechaActual}</Text>
+            <View className="p-5">
+              <Text className="text-gray-400 text-xs mb-5">
+                Fecha de calificación: {fechaActual}
+              </Text>
 
-              <View style={styles.labelRow}>
-                <Text style={styles.label}>Reseña</Text>
-                {error && <Text style={styles.required}> *</Text>}
+              <View className="flex-row items-center mb-1">
+                <Text className="text-white text-base">Reseña</Text>
+                {error && <Text className="text-red-500 text-base"> *</Text>}
               </View>
 
               <TextInput
-                style={styles.textInput}
+                className="bg-[#2C2C2E] text-white p-4 rounded-xl min-h-[120px] border border-[#3A3A3C] mb-5"
                 multiline
                 placeholder="Escribe tu reseña aquí..."
                 placeholderTextColor="#888"
@@ -90,39 +99,46 @@ const Reseñas = ({ id }: { id: string }) => {
                 }}
               />
 
-              <View style={styles.starsContainer}>
-                <View style={styles.stars}>
+              <View className="items-center mb-5">
+                <View className="flex-row mb-1">
                   {[1, 2, 3, 4, 5].map((val) => (
                     <TouchableOpacity key={val} onPress={() => setRating(val)}>
                       <Text
                         style={{
                           fontSize: 28,
-                          color: val <= (rating ?? 0) ? '#facc15' : '#555',
+                          color: val <= (rating ?? 0) ? "#facc15" : "#555",
                           marginHorizontal: 5,
                         }}
                       >
-                        {val <= (rating ?? 0) ? '★' : '☆'}
+                        {val <= (rating ?? 0) ? "★" : "☆"}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-                <Text style={styles.ratingText}>{rating}/5</Text>
+                <Text className="text-white text-base font-bold">
+                  {rating}/5
+                </Text>
               </View>
             </View>
 
             {error && (
-              <Text style={styles.validationError}>*El campo de reseña es obligatorio</Text>
+              <Text className="text-red-500 mt-2 mb-2 px-5">
+                *El campo de reseña es obligatorio
+              </Text>
             )}
 
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Publicar</Text>
+            <TouchableOpacity
+              className="bg-[#A259FF] py-3.5 rounded-full items-center mx-5 mb-5"
+              onPress={handleSubmit}
+            >
+              <Text className="text-white font-bold text-base">Publicar</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: '#444', marginTop: 10 }]}
+              className="bg-[#444] py-3.5 rounded-full items-center mx-5 mb-5 mt-2"
               onPress={() => setMostrarFormulario(false)}
             >
-              <Text style={styles.buttonText}>Cancelar</Text>
+              <Text className="text-white font-bold text-base">Cancelar</Text>
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -130,80 +146,30 @@ const Reseñas = ({ id }: { id: string }) => {
         <>
           <SearchBar
             placeholder="Buscar reseñas..."
-            value={search}
-            onChangeText={setSearch}
-            style={{ marginBottom: 10 }}
+            onSubmit={(value) => setSearch(value)}
           />
 
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <FilterButton onPress={() => console.log('Ordenar/Filtrar')} />
+          <View className="flex-row justify-between items-center mb-5">
+            <FilterButton onPress={() => console.log("Ordenar/Filtrar")} />
             <TouchableOpacity
-              style={{
-                borderWidth: 1,
-                borderColor: '#A259FF',
-                borderRadius: 25,
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              className="border border-[#A259FF] rounded-full py-2 px-3 items-center justify-center"
               onPress={() => setMostrarFormulario(true)}
             >
-              <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
+              <Text className="text-white text-sm font-bold">
                 Escribir reseña
               </Text>
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={{ flex: 1 }}>
+          <ScrollView className="flex-1 pb-20">
             {filteredReviews.length > 0 ? (
               filteredReviews.map((r) => (
-                <View
-                  key={r.id}
-                  style={{
-                    backgroundColor: '#1E1E1E',
-                    borderRadius: 12,
-                    padding: 15,
-                    marginBottom: 15,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                    <View
-                      style={{
-                        width: 40,
-                        height: 40,
-                        backgroundColor: '#555',
-                        borderRadius: 20,
-                        marginRight: 10,
-                      }}
-                    />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-                        {r.nombre}
-                      </Text>
-                      <Text style={{ color: '#FFD700', fontSize: 14 }}>⭐ {r.valoracion}</Text>
-                    </View>
-                  </View>
-                  <Text style={{ color: '#ddd', marginVertical: 10, fontSize: 14 }}>{r.texto}</Text>
-                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-                    <TouchableOpacity style={{ marginRight: 15 }}>
-                      <Text style={{ color: '#888', fontSize: 18 }}>👍</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity>
-                      <Text style={{ color: '#888', fontSize: 18 }}>👎</Text>
-                    </TouchableOpacity>
-                  </View>
+                <View key={r._id}>
+                  <ReseñaCard data={r}/>
                 </View>
               ))
             ) : (
-              <Text style={{ color: '#fff', textAlign: 'center', marginTop: 20 }}>
+              <Text className="text-white text-center mt-5">
                 No se encontraron reseñas.
               </Text>
             )}
@@ -213,72 +179,5 @@ const Reseñas = ({ id }: { id: string }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  formContainer: {
-    padding: 20,
-  },
-  date: {
-    color: '#A0A0A0',
-    fontSize: 13,
-    marginBottom: 20,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  label: {
-    color: 'white',
-    fontSize: 16,
-  },
-  required: {
-    color: 'red',
-    fontSize: 16,
-  },
-  textInput: {
-    backgroundColor: '#2C2C2E',
-    color: 'white',
-    padding: 15,
-    borderRadius: 10,
-    minHeight: 120,
-    textAlignVertical: 'top',
-    borderWidth: 1,
-    borderColor: '#3A3A3C',
-    marginBottom: 20,
-  },
-  starsContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  stars: {
-    flexDirection: 'row',
-    marginBottom: 5,
-  },
-  ratingText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  validationError: {
-    color: 'red',
-    marginTop: 10,
-    marginBottom: 10,
-    paddingHorizontal: 20,
-  },
-  button: {
-    backgroundColor: '#A259FF',
-    paddingVertical: 14,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
 
 export default Reseñas;

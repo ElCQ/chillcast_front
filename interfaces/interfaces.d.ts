@@ -18,3 +18,10 @@ export interface Episode {
   description: string;
   image: string;
 }
+
+export interface Reseña {
+  _id: string;
+  nombre: string;
+  valoracion: number;
+  texto: string;
+}
