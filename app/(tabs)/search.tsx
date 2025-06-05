@@ -4,10 +4,15 @@ import FilterTabs from '@/components/filterTabs'
 import SearchBar from '@/components/SearchBar'
 import { fetchPodcasts } from '@/services/chillastApi'
 import useFetch from '@/services/useFetch'
+import { useLocalSearchParams } from 'expo-router/build/hooks'
 import React, { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const Search = () => {
+
+  const params = useLocalSearchParams();
+
+
   const [modalVisible, setModalVisible] = useState(false)
   const [sortOption, setSortOption] = useState('alphabetical')
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null)
@@ -28,6 +33,38 @@ const Search = () => {
 
   const [search, setSearch] = useState<string>('');
   const flatListRef = useRef<FlatList>(null);
+
+
+  useEffect(() => {
+    const parseArray = (value: string | string[] | undefined): string[] => {     
+      if (Array.isArray(value)) return value;    
+      if (typeof value === "string") return value.split(",");
+      return [];
+    };
+
+    const parseNumber = (
+      value: string | string[] | undefined
+    ): number | null => {
+      const num = Array.isArray(value)
+        ? parseFloat(value[0])
+        : parseFloat(value ?? "");
+      return isNaN(num) ? null : num;
+    };
+
+    setRating(parseNumber(params.rating));
+    setProviders(parseArray(params.providers));
+    setUserRated(
+      typeof params.userRated === "string" ? params.userRated : null
+    );
+    setCategories(parseArray(params.categories));
+    setReleaseDate(
+      typeof params.releaseDate === "string" ? params.releaseDate : null
+    );
+    setCountry(typeof params.country === "string" ? params.country : null);
+    setLanguage(typeof params.language === "string" ? params.language : null);
+    setDuration(typeof params.duration === "string" ? params.duration : null);
+
+  }, []);
 
   const handleSearch = (value: string) => {
     setSearch(value);
