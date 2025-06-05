@@ -9,9 +9,10 @@ import { hexToRgba } from '@/utils/colorUtils';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, ImageBackground, Text, View } from 'react-native';
+import { ActivityIndicator, Image, ImageBackground, Pressable, Text, View } from 'react-native';
 import Informacion from './informacion';
 import Reseñas from './reseñas';
+const SpotifyLogo = require("../../assets/images/spotifyLogo.png");
 
 const Episodio = () => {
     const { id } = useLocalSearchParams();
@@ -24,9 +25,9 @@ const Episodio = () => {
     );
 
     return loading ? (
-        <View className='flex-1 items-center justify-center bg-[#282828]'>
-            <ActivityIndicator size="large" color="#fff" />
-        </View>
+      <View className="flex-1 items-center justify-center bg-[#282828]">
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
     ) : error ? (
       <View className="flex-1 items-center justify-center bg-[#282828]">
         <Text className="text-red-400 text-lg">{error.message}</Text>
@@ -65,17 +66,25 @@ const Episodio = () => {
               </View>
             </View>
 
-            <View className="flex-row items-center justify-start gap-5">
-              <AddButton
-                label="Añadir a favoritos"
-                icon={Icons.CirclePlusIcon}
-                onPress={() => console.log("Añadido a favoritos")}
-              />
-              <AddButton
-                label="Añadir a lista"
-                icon={Icons.FolderPlusIcon}
-                onPress={() => console.log("Añadido a favoritos")}
-              />
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center justify-start gap-5">
+                <AddButton
+                  label="Añadir a favoritos"
+                  icon={Icons.CirclePlusIcon}
+                  onPress={() => console.log("Añadido a favoritos")}
+                />
+                <AddButton
+                  label="Añadir a lista"
+                  icon={Icons.FolderPlusIcon}
+                  onPress={() => console.log("Añadido a favoritos")}
+                />
+              </View>
+
+              {data.source === "Spotify" && (
+                <Pressable>
+                  <Image source={SpotifyLogo} className="size-8" />
+                </Pressable>
+              )}
             </View>
           </LinearGradient>
         </ImageBackground>

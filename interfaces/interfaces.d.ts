@@ -17,6 +17,7 @@ export interface Episode {
   title: string;
   description: string;
   image: string;
+  source:? string;
 }
 
 export interface Reseña {
