@@ -1,12 +1,13 @@
-import PodcastCard from '@/components/cards/podcastCard'
-import FilterButton from '@/components/filterButton'
-import FilterTabs from '@/components/filterTabs'
-import SearchBar from '@/components/SearchBar'
-import { fetchPodcasts } from '@/services/chillastApi'
-import useFetch from '@/services/useFetch'
-import { useLocalSearchParams } from 'expo-router/build/hooks'
-import React, { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+"use client";
+import PodcastCard from '@/components/cards/podcastCard';
+import FilterButton from '@/components/filterButton';
+import FilterTabs from '@/components/filterTabs';
+import SearchBar from '@/components/SearchBar';
+import { fetchPodcasts } from '@/services/chillastApi';
+import useFetch from '@/services/useFetch';
+import { useLocalSearchParams } from 'expo-router/build/hooks';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const Search = () => {
 
@@ -14,7 +15,7 @@ const Search = () => {
 
 
   const [modalVisible, setModalVisible] = useState(false)
-  const [sortOption, setSortOption] = useState('alphabetical')
+  const [sortOption, setSortOption] = useState('Orden: Alfabético')
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null)
 
   const [rating, setRating] = useState<number | null>(null)
@@ -36,8 +37,8 @@ const Search = () => {
 
 
   useEffect(() => {
-    const parseArray = (value: string | string[] | undefined): string[] => {     
-      if (Array.isArray(value)) return value;    
+    const parseArray = (value: string | string[] | undefined): string[] => {
+      if (Array.isArray(value)) return value;
       if (typeof value === "string") return value.split(",");
       return [];
     };
@@ -75,7 +76,7 @@ const Search = () => {
       flatListRef.current.scrollToOffset({ offset: 0, animated: true });
     }
   }, [search]);
-  
+
   const { data, loading, error } = useFetch(() =>
     fetchPodcasts({ query: "podcast" })
   );
@@ -99,7 +100,7 @@ const Search = () => {
       title: 'Ordenar Por',
       key: 'ordenar',
       render: () =>
-        ['alphabetical', 'duration', 'rating'].map(option => (
+        ['Orden: Alfabético', 'Orden: Duración', 'Orden: Puntuación'].map(option => (
           <TouchableOpacity
             key={option}
             onPress={() => setSortOption(option)}
@@ -108,9 +109,9 @@ const Search = () => {
             }`}
           >
             <Text className="text-white capitalize">
-              {option === 'alphabetical'
+              {option === 'Orden: Alfabético'
                 ? 'Alfabéticamente'
-                : option === 'duration'
+                : option === 'Orden: Duración'
                 ? 'Duración'
                 : 'Puntuación'}
             </Text>
@@ -165,46 +166,46 @@ const Search = () => {
         )),
     },
     {
-  title: 'Categoría',
-  key: 'categories',
-  render: () =>
-    [
-      'Noticias',
-      'Politica',
-      'Economia',
-      'Comedia',
-      'Educativo',
-      'Idiomas',
-      'Ciencias',
-      'Historia',
-      'Psicología',
-      'Tecnología',
-      'Cultura y sociedad',
-      'Salud y bienestar',
-      'Negocios',
-      'Cine y TV',
-      'Música',
-      'Deportes',
-      'Crímenes reales',
-      'Terror y Suspenso',
-      'Ficción'
-    ].map(option => (
-      <TouchableOpacity
-        key={option}
-        onPress={() => toggleMultipleSelect(categories, option, setCategories)}
-        className={`py-2 px-4 rounded mt-1 ${
-          categories.includes(option) ? 'bg-purple-600' : 'bg-[#1f1f1f]'
-        }`}
-      >
-        <Text className="text-white">{option}</Text>
-      </TouchableOpacity>
-    )),
-},
+      title: 'Categoría',
+      key: 'categories',
+      render: () =>
+        [
+          'Noticias',
+          'Politica',
+          'Economia',
+          'Comedia',
+          'Educativo',
+          'Idiomas',
+          'Ciencias',
+          'Historia',
+          'Psicología',
+          'Tecnología',
+          'Cultura y sociedad',
+          'Salud y bienestar',
+          'Negocios',
+          'Cine y TV',
+          'Música',
+          'Deportes',
+          'Crímenes reales',
+          'Terror y Suspenso',
+          'Ficción'
+        ].map(option => (
+          <TouchableOpacity
+            key={option}
+            onPress={() => toggleMultipleSelect(categories, option, setCategories)}
+            className={`py-2 px-4 rounded mt-1 ${
+              categories.includes(option) ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+            }`}
+          >
+            <Text className="text-white">{option}</Text>
+          </TouchableOpacity>
+        )),
+    },
     {
       title: 'Fecha de Lanzamiento',
       key: 'fecha',
       render: () =>
-        ['Últimas 24 horas', 'Últimos 3 días','Última semana', 'Último mes', 'Últimos 3 meses','Última Año'].map(option => (
+        ['Últimas 24 horas', 'Últimos 3 días','Última semana', 'Último mes', 'Últimos 3 meses','Último Año'].map(option => (
           <TouchableOpacity
             key={option}
             onPress={() => setReleaseDate(option)}
@@ -487,6 +488,7 @@ const Search = () => {
                 }}
               >
                 <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
                   style={{
                     flex: 1,
                     backgroundColor: "#7c3aed",
@@ -506,7 +508,7 @@ const Search = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    setSortOption("alphabetical");
+                    setSortOption("Orden: Alfabético");
                     setSelectedGenre(null);
                     setRating(null);
                     setProviders([]);
