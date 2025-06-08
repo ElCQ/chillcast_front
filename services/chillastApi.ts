@@ -97,4 +97,34 @@ export const fetchEpisodeById = async ({
 
 
   return data.episode;
-}
+};
+
+export const fetchFavorites = async ({
+  username,
+  token,
+}: {
+  username: string;
+  token?: string;
+}): Promise<Podcast[]> => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${username}`;
+
+  const headers: HeadersInit = {
+    accept: "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching favorites", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+  return data.podcasts;
+};
