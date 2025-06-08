@@ -48,7 +48,7 @@ export const fetchUniquePodcast = async ({
   }
 
   const data = await response.json();
-  return data.podcasts;
+  return data.podcasts[0];
 };
 
 

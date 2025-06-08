@@ -14,10 +14,13 @@ export interface Podcast {
 
 export interface Episode {
   _id: string;
-  title: string;
+  audio_url: string;
   description: string;
+  duration_ms: number;
   image: string;
-  source:? string;
+  language: string;
+  release_date: string;
+  title: string;
 }
 
 export interface Reseña {
