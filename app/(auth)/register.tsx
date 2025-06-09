@@ -1,17 +1,12 @@
 import { useRouter } from 'expo-router';
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    Platform,
-    TouchableWithoutFeedback,
-    Keyboard,
-    ScrollView,
-    KeyboardEvent,
+    View, Text, TextInput, TouchableOpacity,
+    KeyboardAvoidingView, Platform, TouchableWithoutFeedback,
+    Keyboard, ScrollView,
 } from 'react-native';
 import { useEffect, useState } from 'react';
+import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -20,34 +15,22 @@ export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
-
-    const [errors, setErrors] = useState({
-        nombre: false,
-        usuario: false,
-        email: false,
-        password: false,
-        confirm: false,
-    });
-
-    const [generalError, setGeneralError] = useState(false);
-    const [passwordError, setPasswordError] = useState(false);
     const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-    useEffect(() => {
-        const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
-            setKeyboardVisible(true);
-        });
-        const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyboardVisible(false);
-        });
+    const [errors, setErrors] = useState({
+        nombre: false, usuario: false, email: false, password: false, confirm: false,
+    });
 
+    useEffect(() => {
+        const showSubscription = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+        const hideSubscription = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
         return () => {
             showSubscription.remove();
             hideSubscription.remove();
         };
     }, []);
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         const camposIncompletos = {
             nombre: !nombre,
             usuario: !usuario,
@@ -55,8 +38,6 @@ export default function RegisterScreen() {
             password: !password,
             confirm: !confirm,
         };
-
-        const hayCamposIncompletos = Object.values(camposIncompletos).some(Boolean);
         const contraseñasNoCoinciden = confirm !== password;
 
         setErrors({
@@ -64,22 +45,57 @@ export default function RegisterScreen() {
             confirm: camposIncompletos.confirm || contraseñasNoCoinciden,
         });
 
-        setGeneralError(hayCamposIncompletos);
-        setPasswordError(!camposIncompletos.confirm && contraseñasNoCoinciden);
+        const hayCamposInvalidos = Object.values(camposIncompletos).some(Boolean) || contraseñasNoCoinciden;
 
-        if (hayCamposIncompletos || contraseñasNoCoinciden) return;
+        if (hayCamposInvalidos) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error en el formulario',
+                text2: contraseñasNoCoinciden ? 'Las contraseñas no coinciden' : 'Completá todos los campos',
+            });
+            return;
+        }
 
-        setGeneralError(false);
-        setPasswordError(false);
-        router.push('/(auth)/generosIniciales');
+        try {
+            const response = await fetch('https://chillcast-backend.onrender.com/api/v1/auth/register-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: usuario,
+                    email: email,
+                    password: password,
+                    nombre: nombre,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const mensajeError = data?.error || 'Ocurrió un error inesperado';
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error al registrarse',
+                    text2: mensajeError,
+                });
+                return;
+            }
+
+            // Guardar username para usar después (géneros)
+            await AsyncStorage.setItem('username', usuario);
+
+            router.push('/(auth)/generosIniciales');
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error de red',
+                text2: 'No se pudo conectar con el servidor',
+            });
+        }
     };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <KeyboardAvoidingView
-                className="flex-1"
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
+            <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <ScrollView
                     contentContainerStyle={{
                         flexGrow: 1,
@@ -88,14 +104,10 @@ export default function RegisterScreen() {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View className="bg-background px-6">
-                        <Text className="text-white text-3xl font-bold mb-10 text-center font-inter">
-                            Crear Cuenta
-                        </Text>
+                        <Text className="text-white text-3xl font-bold mb-10 text-center font-inter">Crear Cuenta</Text>
 
                         <TextInput
-                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${
-                                errors.nombre ? 'border-red-400' : 'border-transparent'
-                            }`}
+                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${errors.nombre ? 'border-red-400' : 'border-transparent'}`}
                             placeholder="Nombre y Apellido"
                             placeholderTextColor="#888"
                             value={nombre}
@@ -106,9 +118,7 @@ export default function RegisterScreen() {
                         />
 
                         <TextInput
-                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${
-                                errors.usuario ? 'border-red-400' : 'border-transparent'
-                            }`}
+                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${errors.usuario ? 'border-red-400' : 'border-transparent'}`}
                             placeholder="Usuario"
                             placeholderTextColor="#888"
                             value={usuario}
@@ -119,9 +129,7 @@ export default function RegisterScreen() {
                         />
 
                         <TextInput
-                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${
-                                errors.email ? 'border-red-400' : 'border-transparent'
-                            }`}
+                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${errors.email ? 'border-red-400' : 'border-transparent'}`}
                             placeholder="Email"
                             placeholderTextColor="#888"
                             value={email}
@@ -134,9 +142,7 @@ export default function RegisterScreen() {
                         />
 
                         <TextInput
-                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${
-                                errors.password ? 'border-red-400' : 'border-transparent'
-                            }`}
+                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${errors.password ? 'border-red-400' : 'border-transparent'}`}
                             placeholder="Contraseña"
                             placeholderTextColor="#888"
                             value={password}
@@ -148,9 +154,7 @@ export default function RegisterScreen() {
                         />
 
                         <TextInput
-                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${
-                                errors.confirm ? 'border-red-400' : 'border-transparent'
-                            }`}
+                            className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${errors.confirm ? 'border-red-400' : 'border-transparent'}`}
                             placeholder="Confirmar contraseña"
                             placeholderTextColor="#888"
                             value={confirm}
@@ -161,31 +165,12 @@ export default function RegisterScreen() {
                             secureTextEntry
                         />
 
-                        {generalError && (
-                            <Text className="text-red-400 text-center mb-2 font-inter">
-                                Completá todos los campos obligatorios
-                            </Text>
-                        )}
-
-                        {passwordError && (
-                            <Text className="text-red-400 text-center mb-4 font-inter">
-                                Las contraseñas no coinciden
-                            </Text>
-                        )}
-
-                        <TouchableOpacity
-                            className="bg-purple-600 py-3 rounded-full mb-6"
-                            onPress={handleContinue}
-                        >
-                            <Text className="text-white text-center text-lg font-inter">
-                                Continuar
-                            </Text>
+                        <TouchableOpacity className="bg-purple-600 py-3 rounded-full mb-6" onPress={handleContinue}>
+                            <Text className="text-white text-center text-lg font-inter">Continuar</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity onPress={() => router.back()}>
-                            <Text className="text-gray-400 text-center font-inter">
-                                ¿Ya tenés cuenta? Iniciá sesión
-                            </Text>
+                            <Text className="text-gray-400 text-center font-inter">¿Ya tenés cuenta? Iniciá sesión</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -193,7 +178,3 @@ export default function RegisterScreen() {
         </TouchableWithoutFeedback>
     );
 }
-
-
-
-

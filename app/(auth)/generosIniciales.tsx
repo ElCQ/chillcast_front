@@ -1,6 +1,14 @@
 import { useRouter } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    ScrollView,
+    Animated,
+    Alert,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
@@ -25,7 +33,7 @@ export default function WelcomeScreen() {
 
     const toggleGenre = (genre: string) => {
         setSelectedGenres((prev) => {
-            setError(false); // limpiamos el error si toca algo
+            setError(false);
             if (prev.includes(genre)) {
                 return prev.filter((g) => g !== genre);
             } else if (prev.length < 5) {
@@ -36,14 +44,33 @@ export default function WelcomeScreen() {
         });
     };
 
-    const handleContinue = () => {
-        if (selectedGenres.length === 0) {
-            setError(true);
-            return;
-        }
+    const updateUserGenres = async (omit = false) => {
+        try {
+            const usuario = await AsyncStorage.getItem('usuario');
+            if (!usuario) throw new Error('Usuario no encontrado');
 
-        console.log('Enviar al back:', selectedGenres);
-        router.push('/(tabs)/home');
+            const { username } = JSON.parse(usuario);
+
+            const response = await fetch(
+                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(username)}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ generos: omit ? [] : selectedGenres }),
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al actualizar géneros');
+            }
+
+            router.push('/(tabs)/home');
+        } catch (err: any) {
+            Alert.alert('Error', err.message);
+        }
     };
 
     return (
@@ -51,7 +78,7 @@ export default function WelcomeScreen() {
             style={{ flex: 1, opacity: fadeAnim }}
             className="bg-background px-6 pt-20 pb-20"
         >
-            <Text className="text-white text-3xl font-bold mb-2 text-center">¡Bienvenido!</Text>
+            <Text className="text-white text-3xl font-bold mb-2 text-center">Bienvenido!</Text>
             <Text className="text-white mb-10 text-center text-sm">
                 Elegí los géneros que te interesan (máximo 5)
             </Text>
@@ -84,10 +111,20 @@ export default function WelcomeScreen() {
             )}
 
             <TouchableOpacity
-                onPress={handleContinue}
-                className="bg-purple-600 py-3 rounded-full"
+                onPress={() => {
+                    if (selectedGenres.length === 0) {
+                        setError(true);
+                        return;
+                    }
+                    updateUserGenres();
+                }}
+                className="bg-purple-600 py-3 rounded-full mb-4"
             >
-                <Text className="text-white text-center font-semibold">Registrarse</Text>
+                <Text className="text-white text-center font-semibold">Finalizar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => updateUserGenres(true)}>
+                <Text className="text-gray-400 text-center font-inter">Omitir</Text>
             </TouchableOpacity>
         </Animated.View>
     );

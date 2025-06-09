@@ -76,7 +76,6 @@ export default function LoginScreen() {
                     await AsyncStorage.removeItem('userEmail');
                 }
                 await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
-                router.replace('/(tabs)/home');
                 router.push('/(tabs)/home');
             } else {
                 Alert.alert('Error', 'Login inválido');
