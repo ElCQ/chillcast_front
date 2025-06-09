@@ -2,7 +2,7 @@ import EpisodioCard from "@/components/cards/episodioCard";
 import FilterButton from "@/components/filterButton";
 import SearchBar from "@/components/SearchBar";
 import { Podcast } from "@/interfaces/interfaces";
-import { mockFetchEpisodes } from "@/services/mockService";
+import { fetchEpisodesFromPodcast } from "@/services/chillastApi";
 import useFetch from "@/services/useFetch";
 import { useState } from "react";
 import {
@@ -23,7 +23,7 @@ const Episodios = ({ dataPodcast }: { dataPodcast: Podcast }) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const { data, loading, error } = useFetch(() =>
-    mockFetchEpisodes({ id: dataPodcast._id })
+    fetchEpisodesFromPodcast({ id: dataPodcast._id })
   );
 
   const handleSearch = (value: string) => {
@@ -82,11 +82,13 @@ const Episodios = ({ dataPodcast }: { dataPodcast: Podcast }) => {
         if (orden === "desc") return b.title.localeCompare(a.title);
         if (orden === "reciente")
           return (
-            new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+            new Date(b.release_date).getTime() -
+            new Date(a.release_date).getTime()
           );
         if (orden === "viejo")
           return (
-            new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
+            new Date(a.release_date).getTime() -
+            new Date(b.release_date).getTime()
           );
         if (orden === "valoracion_asc") return a.rating - b.rating;
         if (orden === "valoracion_desc") return b.rating - a.rating;

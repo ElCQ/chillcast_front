@@ -1,7 +1,7 @@
-import React from 'react'
-import { Text, TouchableOpacity } from 'react-native'
+import React from 'react';
+import { Text, TouchableOpacity } from 'react-native';
 
-const optionButton = ({ texto, activo, onPress }: { texto: string, activo: boolean, onPress: () => void }) => {
+const OptionButton = ({ texto, activo, onPress }: { texto: string, activo: boolean, onPress: () => void }) => {
     return (
         <TouchableOpacity
             key={texto}
@@ -20,4 +20,4 @@ const optionButton = ({ texto, activo, onPress }: { texto: string, activo: boole
     )
 }
 
-export default optionButton
+export default OptionButton;

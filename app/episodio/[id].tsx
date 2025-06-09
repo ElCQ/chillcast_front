@@ -3,7 +3,7 @@ import BackButton from '@/components/buttons/backButton';
 import FilterTabs from '@/components/filterTabs';
 import { StarRatingTextLg } from '@/components/starRatingText';
 import { Icons } from '@/constants/icons';
-import { mockFetchEpisodeById } from '@/services/mockService';
+import { fetchEpisodeById } from '@/services/chillastApi';
 import useFetch from '@/services/useFetch';
 import { hexToRgba } from '@/utils/colorUtils';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,9 +19,8 @@ const Episodio = () => {
     const [activeTab, setActiveTab] = useState("Información");
     const tabs = ["Información", "Reseñas"];
 
-
     const { data, loading, error } = useFetch(() =>
-      mockFetchEpisodeById({ id: id })
+      fetchEpisodeById({ id: id })
     );
 
     return loading ? (
@@ -80,7 +79,7 @@ const Episodio = () => {
                 />
               </View>
 
-              {data.source === "Spotify" && (
+              {"Spotify" === "Spotify" && (
                 <Pressable>
                   <Image source={SpotifyLogo} className="size-8" />
                 </Pressable>

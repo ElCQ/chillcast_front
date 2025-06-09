@@ -44,12 +44,23 @@ const Informacion = ({ data }: { data: Podcast }) => {
       </ExpandableSection>
 
       <ExpandableSection titulo="Hosts">
-        <Text className="text-white text-sm px-5 py-2">{data.author}</Text>
+        <View className="flex flex-row flex-wrap px-4 py-5">
+          
+            {data.author.map((genre) => (
+              <View key={genre}>
+                <TagButton
+                  nombre={genre}
+                  onPress={() => handleTagSearch(genre)}
+                />
+              </View>
+            ))}
+
+        </View>
       </ExpandableSection>
 
       <ExpandableSection titulo="Tags y Categorías">
         <View className="flex flex-row flex-wrap px-4 pt-5 pb-20">
-          {GENRES.map((genre) => (
+          {data.GenreName.map((genre) => (
             <View key={genre}>
               <TagButton
                 nombre={genre}

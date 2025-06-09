@@ -10,7 +10,7 @@ const EpisodioCard = ({episode}: {episode: Episode}) => {
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => {}}
-        className="flex-row bg-[#393939] rounded-[18px] mb-3 items-center elevation-2 p-0 h-[100px] overflow-hidden"
+        className="flex-row bg-[#393939] rounded-[18px] mb-3 items-center elevation-2 p-0 overflow-hidden"
       >
         <Image
           source={
@@ -22,14 +22,17 @@ const EpisodioCard = ({episode}: {episode: Episode}) => {
           resizeMode="cover"
         />
         <View className="flex-1 px-6 justify-start py-5 h-full">
-          <View className="flex-row items-center justify-between mb-[2px]">
-            <Text className="text-white font-bold text-lg" numberOfLines={1}>
+          <View className="flex-row items-start justify-between mb-[2px]">
+            <Text
+              className="flex-1 text-white font-bold text-lg text-wrap"
+              numberOfLines={2}
+            >
               {episode.title}
             </Text>
             <StarRatingTextSm rating={3} />
           </View>
           <View className="flex-row items-center mb-1">
-            <Text className="text-[#D0D0D0] text-sm" numberOfLines={1}>
+            <Text className="text-[#D0D0D0] text-sm" numberOfLines={2}>
               {episode.description || "Podcast"}
             </Text>
           </View>
