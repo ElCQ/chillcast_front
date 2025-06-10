@@ -48,18 +48,18 @@ export const fetchUniquePodcast = async ({
   }
 
   const data = await response.json();
-  return data.podcasts;
+  return data.podcasts[0];
 };
 
 
-export const fetchEpisodes = async ({
+export const fetchEpisodesFromPodcast = async ({
   id,
 }: {
   id: string | string[];
 }): Promise<Episode[]> => {
 
   //TODO: Faltar implementar el endpoint de episodios
-  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/podcast/episodes?id=${id}`;
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/episode?podcast=${id}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
@@ -82,7 +82,7 @@ export const fetchEpisodeById = async ({
 }): Promise<Episode> => {
   
   //TODO: Falta implementar el endpoint de episodios
-   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/episode/id?id=${id}`;
+   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/episode?episode=${id}`;
 
    const response = await fetch(endpoint, {
      method: "GET",
@@ -96,5 +96,35 @@ export const fetchEpisodeById = async ({
   const data = await response.json();
 
 
-  return data.episode;
-}
+  return data.episodes[0];
+};
+
+export const fetchFavorites = async ({
+  username,
+  token,
+}: {
+  username: string;
+  token?: string;
+}): Promise<Podcast[]> => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${username}`;
+
+  const headers: HeadersInit = {
+    accept: "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching favorites", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+  return data.podcasts;
+};

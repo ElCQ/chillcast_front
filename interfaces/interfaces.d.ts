@@ -5,8 +5,8 @@ export interface Podcast {
   title: string;
   description: string;
   image: string;
-  author: string;
-  GenreName: string | null;
+  author: string[];
+  GenreName: string[];
   feed_url: string | null;
   language: string;
   source: string;
@@ -14,10 +14,14 @@ export interface Podcast {
 
 export interface Episode {
   _id: string;
-  title: string;
+  audio_url: string;
   description: string;
+  duration_ms: number;
   image: string;
-  source:? string;
+  language: string;
+  release_date: string;
+  title: string;
+  rating: number;
 }
 
 export interface Reseña {
