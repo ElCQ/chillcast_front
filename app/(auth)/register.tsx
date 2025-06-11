@@ -1,12 +1,15 @@
-import { useRouter } from 'expo-router';
-import {
-    View, Text, TextInput, TouchableOpacity,
-    KeyboardAvoidingView, Platform, TouchableWithoutFeedback,
-    Keyboard, ScrollView,
-} from 'react-native';
-import { useEffect, useState } from 'react';
-import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+    Keyboard,
+    KeyboardAvoidingView, Platform,
+    ScrollView,
+    Text, TextInput, TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
+} from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -81,7 +84,7 @@ export default function RegisterScreen() {
             }
 
             // Guardar username para usar después (géneros)
-            await AsyncStorage.setItem('username', usuario);
+            await AsyncStorage.setItem('usuario', usuario);
 
             router.push('/(auth)/generosIniciales');
         } catch (error) {

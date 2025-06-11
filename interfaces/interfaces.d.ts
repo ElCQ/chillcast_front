@@ -2,11 +2,12 @@
 
 export interface Podcast {
   _id: string;
+  id?: string;
   title: string;
   description: string;
   image: string;
-  author: string[];
-  GenreName: string[];
+  autores: string[];
+  generos: string[];
   feed_url: string | null;
   language: string;
   source: string;

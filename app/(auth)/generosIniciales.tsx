@@ -1,14 +1,13 @@
-import { useRouter } from 'expo-router';
-import { useState, useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    Animated,
-    Alert,
-} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    ScrollView,
+    Text,
+    TouchableOpacity
+} from 'react-native';
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
@@ -46,13 +45,15 @@ export default function WelcomeScreen() {
 
     const updateUserGenres = async (omit = false) => {
         try {
-            const usuario = await AsyncStorage.getItem('usuario');
+            const usuario = await AsyncStorage.getItem("usuario");
+            console.log(usuario);
+            
             if (!usuario) throw new Error('Usuario no encontrado');
 
-            const { username } = JSON.parse(usuario);
+            //const { username } = JSON.parse(usuario);
 
             const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(username)}`,
+                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(usuario)}`,
                 {
                     method: 'PUT',
                     headers: {

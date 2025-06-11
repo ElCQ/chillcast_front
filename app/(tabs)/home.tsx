@@ -1,20 +1,23 @@
 import CardContainer from "@/components/cardContainer";
 import SearchBar from "@/components/SearchBar";
-import { fetchPodcasts } from "@/services/chillastApi";
+import { fetchPodcastsFilters } from "@/services/chillastApi";
 import useFetch from "@/services/useFetch";
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from "expo-router";
 import React from "react";
-import { ActivityIndicator, ScrollView, Text, View, BackHandler} from "react-native";
-import { useFocusEffect } from '@react-navigation/native';
+import { ActivityIndicator, BackHandler, ScrollView, Text, View } from "react-native";
 
 const Home = () => {
   const router = useRouter();
 
   const { data, loading, error } = useFetch(() =>
-    fetchPodcasts({ query: "podcast" })
+    fetchPodcastsFilters({ genero: "Cultura y Sociedad" })
   );
 
   const firstTen = data?.slice(0, 10);
+  const firstTen2 = data?.slice(10, 20);
+  const firstTen3 = data?.slice(20, 30);
+
 
   return (
     <View className="bg-[#282828] flex-1 items-center justify-start gap-5 pt-10">
@@ -45,14 +48,14 @@ const Home = () => {
                 nombre="Recomendaciones del dia"
               />
               <CardContainer
-                datos={firstTen}
+                datos={firstTen2}
                 loading={loading}
                 error={error}
                 nombre="Según tus gustos"
                 color="#5C0055"
               />
               <CardContainer
-                datos={firstTen}
+                datos={firstTen3}
                 loading={loading}
                 error={error}
                 nombre="Escuchar algo nuevo"

@@ -30,11 +30,47 @@ export const fetchPodcasts = async ({
   return data.podcasts;
 };
 
+export const fetchPodcastsFilters = async (filters: {
+  title?: string;
+  autores?: string;
+  genero?: string;
+  source?: string;
+  duracion?: string | number;
+  [key: string]: any; // for flexibility
+}): Promise<Podcast[]> => {
+  // Build query string from filters object
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.append(key, String(value));
+    }
+  });
+
+  const endpoint = `${
+    CHILLCAST_CONFIG.BASE_URL
+  }/api/v1/podcast/filters?${params.toString()}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching podcasts", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+  return data.podcasts;
+};
+
 export const fetchUniquePodcast = async ({
   id,
 }: {
   id: string | string[];
 }): Promise<Podcast> => {
+
+  console.log(id);
+  
 
   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/podcast/id?id=${id}`;
 
@@ -48,7 +84,7 @@ export const fetchUniquePodcast = async ({
   }
 
   const data = await response.json();
-  return data.podcasts[0];
+  return data.podcasts;
 };
 
 

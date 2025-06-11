@@ -8,7 +8,7 @@ import { StarRatingTextSm } from '../starRatingText';
 const PodcastCard = ({ data }: { data?: Podcast }) => {
 
     return (
-      <Link href={`/podcast/${data?._id}`} asChild>
+      <Link href={`/podcast/${data?.id ? data.id : data?._id}`} asChild>
         <TouchableOpacity className="mr-2 h-[280px] w-[180px] bg-gray-600 rounded-lg overflow-hidden">
           <ImageBackground
             source={{uri: data?.image || 'https://via.placeholder.com/180x280'}}

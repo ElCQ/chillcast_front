@@ -45,22 +45,17 @@ const Informacion = ({ data }: { data: Podcast }) => {
 
       <ExpandableSection titulo="Hosts">
         <View className="flex flex-row flex-wrap px-4 py-5">
-          
-            {data.author.map((genre) => (
-              <View key={genre}>
-                <TagButton
-                  nombre={genre}
-                  onPress={() => handleTagSearch(genre)}
-                />
-              </View>
-            ))}
-
+          {data.autores.map((autor) => (
+            <View key={autor}>
+              <TagButton nombre={autor} onPress={() => console.log("a")} />
+            </View>
+          ))}
         </View>
       </ExpandableSection>
 
       <ExpandableSection titulo="Tags y Categorías">
         <View className="flex flex-row flex-wrap px-4 pt-5 pb-20">
-          {data.GenreName.map((genre) => (
+          {data.generos.map((genre) => (
             <View key={genre}>
               <TagButton
                 nombre={genre}

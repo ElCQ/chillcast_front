@@ -3,38 +3,39 @@ import PodcastCard from '@/components/cards/podcastCard';
 import FilterButton from '@/components/filterButton';
 import FilterTabs from '@/components/filterTabs';
 import SearchBar from '@/components/SearchBar';
-import { fetchPodcasts } from '@/services/chillastApi';
-import useFetch from '@/services/useFetch';
+import { Podcast } from '@/interfaces/interfaces';
+import { fetchPodcasts, fetchPodcastsFilters } from '@/services/chillastApi';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const Search = () => {
-
   const params = useLocalSearchParams();
 
+  const [data, setData] = useState<Podcast[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const [modalVisible, setModalVisible] = useState(false)
-  const [sortOption, setSortOption] = useState('Orden: Alfabético')
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null)
+  const [modalVisible, setModalVisible] = useState(false);
+  const [sortOption, setSortOption] = useState("Orden: Alfabético");
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
-  const [rating, setRating] = useState<number | null>(null)
-  const [providers, setProviders] = useState<string[]>([])
-  const [userRated, setUserRated] = useState<string | null>(null)
-  const [categories, setCategories] = useState<string[]>([])
-  const [releaseDate, setReleaseDate] = useState<string | null>(null)
-  const [country, setCountry] = useState<string | null>(null)
-  const [language, setLanguage] = useState<string | null>(null)
-  const [duration, setDuration] = useState<string | null>(null)
+  const [rating, setRating] = useState<number | null>(null);
+  const [providers, setProviders] = useState<string[]>([]);
+  const [userRated, setUserRated] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [releaseDate, setReleaseDate] = useState<string | null>(null);
+  const [country, setCountry] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string | null>(null);
+  const [duration, setDuration] = useState<string | null>(null);
 
-  const [expandedSections, setExpandedSections] = useState<string[]>([])
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  const tabs = ['Podcasts', 'Episodios', 'Hosts'];
-  const [activeTab, setActiveTab] = useState('Podcasts');
+  const tabs = ["Podcasts", "Episodios"];
+  const [activeTab, setActiveTab] = useState("Podcasts");
 
-  const [search, setSearch] = useState<string>('');
+  const [search, setSearch] = useState<string>("");
   const flatListRef = useRef<FlatList>(null);
-
 
   useEffect(() => {
     const parseArray = (value: string | string[] | undefined): string[] => {
@@ -64,7 +65,6 @@ const Search = () => {
     setCountry(typeof params.country === "string" ? params.country : null);
     setLanguage(typeof params.language === "string" ? params.language : null);
     setDuration(typeof params.duration === "string" ? params.duration : null);
-
   }, []);
 
   const handleSearch = (value: string) => {
@@ -77,195 +77,288 @@ const Search = () => {
     }
   }, [search]);
 
-  const { data, loading, error } = useFetch(() =>
+  const buildFilters = () => ({
+    title: search || undefined,
+    rating: rating || undefined,
+    source: providers.length > 0 ? providers.join(",") : undefined,
+    autores: userRated || undefined,
+    genero: categories.length > 0 ? categories.join(",") : undefined,
+    releaseDate: releaseDate || undefined,
+    country: country || undefined,
+    language: language || undefined,
+    duracion: duration || undefined,
+    // Add more if needed
+  });
+
+  const handleApplyFilters = async () => {
+    setLoading(true);
+    setModalVisible(false);
+    setError(null);
+    try {
+      const filters = buildFilters();
+      const filtered = await fetchPodcastsFilters(filters);
+      setData(filtered);
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
     fetchPodcasts({ query: "podcast" })
-  );
+      .then((res) => setData(res))
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, []);
 
   const toggleSection = (key: string) => {
-    setExpandedSections(prev =>
-      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
-    )
-  }
+    setExpandedSections((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
 
-  const toggleMultipleSelect = (list: string[], item: string, setter: (val: string[]) => void) => {
+  const toggleMultipleSelect = (
+    list: string[],
+    item: string,
+    setter: (val: string[]) => void
+  ) => {
     if (list.includes(item)) {
-      setter(list.filter(i => i !== item))
+      setter(list.filter((i) => i !== item));
     } else {
-      setter([...list, item])
+      setter([...list, item]);
     }
-  }
+  };
+
+
+  const SORT_OPTIONS = [
+    { nombre: "Alfabéticamente", valor: "Orden: Alfabético" },
+    { nombre: "Duración", valor: "Orden: Duración" },
+    { nombre: "Puntuación", valor: "Orden: Puntuación" },
+  ];
+
+  const PROVIDER_OPTIONS = [
+    { nombre: "Spotify", valor: "Spotify" },
+    { nombre: "Apple", valor: "Apple" },
+    { nombre: "YouTube", valor: "YouTube" },
+    { nombre: "Otros", valor: "Otros" },
+  ];
+
+  const USER_RATED_OPTIONS = [
+    { nombre: "Incluir", valor: "Incluir" },
+    { nombre: "No incluir", valor: "No incluir" },
+  ];
+
+  const CATEGORY_OPTIONS = [
+    { nombre: "Noticias", valor: "Noticias" },
+    { nombre: "Politica", valor: "Politica" },
+    { nombre: "Economia", valor: "Economia" },
+    { nombre: "Comedia", valor: "Comedia" },
+    { nombre: "Educativo", valor: "Educativo" },
+    { nombre: "Idiomas", valor: "Idiomas" },
+    { nombre: "Ciencias", valor: "Ciencias" },
+    { nombre: "Historia", valor: "Historia" },
+    { nombre: "Psicología", valor: "Psicología" },
+    { nombre: "Tecnología", valor: "Tecnología" },
+    { nombre: "Cultura y sociedad", valor: "Cultura y sociedad" },
+    { nombre: "Salud y bienestar", valor: "Salud y bienestar" },
+    { nombre: "Negocios", valor: "Negocios" },
+    { nombre: "Cine y TV", valor: "Cine y TV" },
+    { nombre: "Música", valor: "Música" },
+    { nombre: "Deportes", valor: "Deportes" },
+    { nombre: "Crímenes reales", valor: "Crímenes reales" },
+    { nombre: "Terror y Suspenso", valor: "Terror y Suspenso" },
+    { nombre: "Ficción", valor: "Ficción" },
+  ];
+
+  const RELEASE_DATE_OPTIONS = [
+    { nombre: "Últimas 24 horas", valor: "Últimas 24 horas" },
+    { nombre: "Últimos 3 días", valor: "Últimos 3 días" },
+    { nombre: "Última semana", valor: "Última semana" },
+    { nombre: "Último mes", valor: "Último mes" },
+    { nombre: "Últimos 3 meses", valor: "Últimos 3 meses" },
+    { nombre: "Último Año", valor: "Último Año" },
+  ];
+
+  const COUNTRY_OPTIONS = [
+    { nombre: "Argentina", valor: "Argentina" },
+    { nombre: "México", valor: "México" },
+    { nombre: "Chile", valor: "Chile" },
+  ];
+
+  const LANGUAGE_OPTIONS = [
+    { nombre: "Español", valor: "Español" },
+    { nombre: "Inglés", valor: "Inglés" },
+    { nombre: "Portugués", valor: "Portugués" },
+  ];
+
+  const DURATION_OPTIONS = [
+    { nombre: "1 a 5 minutos", valor: "5" },
+    { nombre: "5 a 10 minutos", valor: "10" },
+    { nombre: "10 a 30 minutos", valor: "30" },
+    { nombre: "30 a 60 minutos", valor: "60" },
+    { nombre: "Más de una hora", valor: "100" },
+  ];
 
   const filterSections = [
     {
-      title: 'Ordenar Por',
-      key: 'ordenar',
+      title: "Ordenar Por",
+      key: "ordenar",
       render: () =>
-        ['Orden: Alfabético', 'Orden: Duración', 'Orden: Puntuación'].map(option => (
+        SORT_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => setSortOption(option)}
+            key={option.valor}
+            onPress={() => setSortOption(option.valor)}
             className={`py-2 px-4 rounded mt-1 ${
-              sortOption === option ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              sortOption === option.valor ? "bg-purple-600" : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white capitalize">
-              {option === 'Orden: Alfabético'
-                ? 'Alfabéticamente'
-                : option === 'Orden: Duración'
-                ? 'Duración'
-                : 'Puntuación'}
-            </Text>
+            <Text className="text-white capitalize">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
     {
-      title: 'Calificación Promedio',
-      key: 'rating',
+      title: "Calificación Promedio",
+      key: "rating",
       render: () => (
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {[1, 2, 3, 4, 5].map(val => (
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          {[1, 2, 3, 4, 5].map((val) => (
             <TouchableOpacity key={val} onPress={() => setRating(val)}>
-              <Text style={{ fontSize: 28, color: val <= (rating ?? 0) ? '#facc15' : '#555' }}>
-                {val <= (rating ?? 0) ? '★' : '☆'}
+              <Text
+                style={{
+                  fontSize: 28,
+                  color: val <= (rating ?? 0) ? "#facc15" : "#555",
+                }}
+              >
+                {val <= (rating ?? 0) ? "★" : "☆"}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
-      )
+      ),
     },
     {
-      title: 'Proveedor',
-      key: 'providers',
+      title: "Proveedor",
+      key: "providers",
       render: () =>
-        ['Spotify', 'Apple', 'YouTube', 'Otros'].map(option => (
+        PROVIDER_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => toggleMultipleSelect(providers, option, setProviders)}
+            key={option.valor}
+            onPress={() =>
+              toggleMultipleSelect(providers, option.valor, setProviders)
+            }
             className={`py-2 px-4 rounded mt-1 ${
-              providers.includes(option) ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              providers.includes(option.valor)
+                ? "bg-purple-600"
+                : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white">{option}</Text>
+            <Text className="text-white">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
     {
-      title: 'Calificado por mí',
-      key: 'userRated',
+      title: "Calificado por mí",
+      key: "userRated",
       render: () =>
-        ['Incluir', 'No incluir'].map(option => (
+        USER_RATED_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => setUserRated(option)}
+            key={option.valor}
+            onPress={() => setUserRated(option.valor)}
             className={`py-2 px-4 rounded mt-1 ${
-              userRated === option ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              userRated === option.valor ? "bg-purple-600" : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white">{option}</Text>
+            <Text className="text-white">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
     {
-      title: 'Categoría',
-      key: 'categories',
+      title: "Categoría",
+      key: "categories",
       render: () =>
-        [
-          'Noticias',
-          'Politica',
-          'Economia',
-          'Comedia',
-          'Educativo',
-          'Idiomas',
-          'Ciencias',
-          'Historia',
-          'Psicología',
-          'Tecnología',
-          'Cultura y sociedad',
-          'Salud y bienestar',
-          'Negocios',
-          'Cine y TV',
-          'Música',
-          'Deportes',
-          'Crímenes reales',
-          'Terror y Suspenso',
-          'Ficción'
-        ].map(option => (
+        CATEGORY_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => toggleMultipleSelect(categories, option, setCategories)}
+            key={option.valor}
+            onPress={() =>
+              toggleMultipleSelect(categories, option.valor, setCategories)
+            }
             className={`py-2 px-4 rounded mt-1 ${
-              categories.includes(option) ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              categories.includes(option.valor)
+                ? "bg-purple-600"
+                : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white">{option}</Text>
+            <Text className="text-white">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
     {
-      title: 'Fecha de Lanzamiento',
-      key: 'fecha',
+      title: "Fecha de Lanzamiento",
+      key: "fecha",
       render: () =>
-        ['Últimas 24 horas', 'Últimos 3 días','Última semana', 'Último mes', 'Últimos 3 meses','Último Año'].map(option => (
+        RELEASE_DATE_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => setReleaseDate(option)}
+            key={option.valor}
+            onPress={() => setReleaseDate(option.valor)}
             className={`py-2 px-4 rounded mt-1 ${
-              releaseDate === option ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              releaseDate === option.valor ? "bg-purple-600" : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white">{option}</Text>
+            <Text className="text-white">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
     {
-      title: 'País Disponible',
-      key: 'pais',
+      title: "País Disponible",
+      key: "pais",
       render: () =>
-        ['Argentina', 'México', 'Chile'].map(option => (
+        COUNTRY_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => setCountry(option)}
+            key={option.valor}
+            onPress={() => setCountry(option.valor)}
             className={`py-2 px-4 rounded mt-1 ${
-              country === option ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              country === option.valor ? "bg-purple-600" : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white">{option}</Text>
+            <Text className="text-white">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
     {
-      title: 'Idioma',
-      key: 'idioma',
+      title: "Idioma",
+      key: "idioma",
       render: () =>
-        ['Español', 'Inglés', 'Portugués'].map(option => (
+        LANGUAGE_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => setLanguage(option)}
+            key={option.valor}
+            onPress={() => setLanguage(option.valor)}
             className={`py-2 px-4 rounded mt-1 ${
-              language === option ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              language === option.valor ? "bg-purple-600" : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white">{option}</Text>
+            <Text className="text-white">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
     {
-      title: 'Duración',
-      key: 'duracion',
+      title: "Duración",
+      key: "duracion",
       render: () =>
-        ['1 a 5 minutos','5 a 10 minutos', '10 a 30 minutos','30 a 60 minutos','Más de una hora'].map(option => (
+        DURATION_OPTIONS.map((option) => (
           <TouchableOpacity
-            key={option}
-            onPress={() => setDuration(option)}
+            key={option.valor}
+            onPress={() => setDuration(option.valor)}
             className={`py-2 px-4 rounded mt-1 ${
-              duration === option ? 'bg-purple-600' : 'bg-[#1f1f1f]'
+              duration === option.valor ? "bg-purple-600" : "bg-[#1f1f1f]"
             }`}
           >
-            <Text className="text-white">{option}</Text>
+            <Text className="text-white">{option.nombre}</Text>
           </TouchableOpacity>
         )),
     },
-  ]
+  ];
 
   return (
     <View className="bg-[#282828] flex-1 items-center justify-start gap-3 pt-20">
@@ -488,7 +581,7 @@ const Search = () => {
                 }}
               >
                 <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
+                  onPress={handleApplyFilters}
                   style={{
                     flex: 1,
                     backgroundColor: "#7c3aed",

@@ -1,4 +1,3 @@
-import TagButton from '@/components/buttons/tagButton';
 import ExpandableSection from '@/components/expandableSection';
 import { Episode } from '@/interfaces/interfaces';
 import { useRouter } from 'expo-router';
@@ -39,10 +38,18 @@ const Informacion = ({ data }: { data: Episode }) => {
   return (
     <View className="gap-2">
       <ExpandableSection titulo="Descripción">
+        <Text className="text-white text-sm px-5 py-2 mt-5">
+          Dia emitido: {data.release_date}
+        </Text>
+        <Text className="text-white text-sm px-5 py-2">
+          Lenguaje: {data.language}
+        </Text>
+
         <Text className="text-white text-sm px-5 py-2">{data.description}</Text>
+
       </ExpandableSection>
 
-      <ExpandableSection titulo="Tags y Categorías">
+      {/* <ExpandableSection titulo="Tags y Categorías">
         <View className="flex flex-row flex-wrap px-4 pt-5 pb-20">
           {GENRES.map((genre) => (
             <View key={genre}>
@@ -53,7 +60,7 @@ const Informacion = ({ data }: { data: Episode }) => {
             </View>
           ))}
         </View>
-      </ExpandableSection>
+      </ExpandableSection> */}
     </View>
   );
 };

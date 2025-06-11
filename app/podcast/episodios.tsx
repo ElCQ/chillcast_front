@@ -23,7 +23,7 @@ const Episodios = ({ dataPodcast }: { dataPodcast: Podcast }) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const { data, loading, error } = useFetch(() =>
-    fetchEpisodesFromPodcast({ id: dataPodcast._id })
+    fetchEpisodesFromPodcast({ id: dataPodcast.id ? dataPodcast.id : dataPodcast._id })
   );
 
   const handleSearch = (value: string) => {

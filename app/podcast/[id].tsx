@@ -20,9 +20,15 @@ const Podcasts = () => {
   const [activeTab, setActiveTab] = useState("Información");
   const tabs = ["Información", "Episodios", "Reseñas"];
 
+  console.log("a: " + id);
+  
+
   const { data, loading, error } = useFetch(() =>
     fetchUniquePodcast({ id: id })
   );
+
+  console.log(data);
+  
 
   return loading ? (
     <View className="flex-1 items-center justify-center bg-[#282828]">
