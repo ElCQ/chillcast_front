@@ -1,8 +1,8 @@
 import { Inter_400Regular, Inter_700Bold, useFonts } from "@expo-google-fonts/inter";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
-import '../global.css';
 import Toast from 'react-native-toast-message';
+import '../global.css';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({

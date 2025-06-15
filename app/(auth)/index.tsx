@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { MotiView } from 'moti';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 export default function IntroScreen() {
     const router = useRouter();

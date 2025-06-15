@@ -39,6 +39,13 @@ const _Layout = () => {
           )
         }
       }} />
+            <Tabs.Screen name="feed" options={{
+        title: 'Feed', headerShown: false, tabBarIcon: ({ focused }) => {
+          return (
+            <TabIcon focused={focused} icon={Icons.CirclePlusIcon} />
+          )
+        }
+      }} />
       <Tabs.Screen name="miEspacio" options={{
         title: 'Mi Espacio', headerShown: false, tabBarIcon: ({ focused }) => {
           return (
