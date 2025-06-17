@@ -13,6 +13,9 @@ import { ActivityIndicator, Image, ImageBackground, Pressable, Text, View } from
 import Episodios from "./episodios";
 import Informacion from "./informacion";
 import Reseñas from "./reseñas";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
+import { fetchAddFavorite } from "@/services/chillastApi";
 const SpotifyLogo = require("../../assets/images/spotifyLogo.png");
 
 const Podcasts = () => {
@@ -28,7 +31,41 @@ const Podcasts = () => {
   );
 
   console.log(data);
-  
+
+  const handleAddToFavorites = async () => {
+    console.log("Click en añadir a favoritos");
+
+    try {
+      const usuarioStr = await AsyncStorage.getItem("usuario");
+      const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+
+      if (!usuario || !usuario.username) {
+        throw new Error("No estás autenticado");
+      }
+
+      const podcastId = Array.isArray(id) ? id[0] : id;
+
+      await fetchAddFavorite({
+        username: usuario.username,
+        podcastId,
+      });
+
+      Toast.show({
+        type: "success",
+        text1: "¡Éxito!",
+        text2: "Podcast añadido a favoritos",
+      });
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2:
+          err instanceof Error
+            ? err.message
+            : "Error al agregar a favoritos",
+      });
+    }
+  };
 
   return loading ? (
     <View className="flex-1 items-center justify-center bg-[#282828]">
@@ -77,7 +114,7 @@ const Podcasts = () => {
               <AddButton
                 label="Añadir a favoritos"
                 icon={Icons.CirclePlusIcon}
-                onPress={() => console.log("Añadido a favoritos")}
+                onPress={handleAddToFavorites}
               />
               <AddButton
                 label="Añadir a lista"

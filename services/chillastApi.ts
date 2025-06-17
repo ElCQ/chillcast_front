@@ -135,32 +135,81 @@ export const fetchEpisodeById = async ({
   return data.episodes[0];
 };
 
-export const fetchFavorites = async ({
-  username,
-  token,
-}: {
-  username: string;
-  token?: string;
-}): Promise<Podcast[]> => {
-  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${username}`;
-
-  const headers: HeadersInit = {
-    accept: "application/json",
-  };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+// Obtener favoritos (GET)
+export const fetchFavorites = async (username: string): Promise<Podcast[]> => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${encodeURIComponent(username)}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
-    headers,
+    headers: {
+      accept: "application/json",
+    },
   });
 
   if (!response.ok) {
-    throw new Error("Error fetching favorites", { cause: response.statusText });
+    throw new Error("Error al obtener los favoritos");
   }
 
   const data = await response.json();
-  return data.podcasts;
+  return data.favorites;
+};
+
+// Agregar a favoritos (POST)
+export const fetchAddFavorite = async ({
+  username,
+  podcastId,
+}: {
+  username: string;
+  podcastId: string;
+}) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${encodeURIComponent(username)}`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify({ podcast: podcastId }),
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    console.error("Error al agregar favorito", text);
+    throw new Error(`Error al agregar favorito: ${text}`);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error parseando JSON en agregar favorito:", error, "Texto:", text);
+    throw new Error("Respuesta inválida del servidor al agregar favorito");
+  }
+};
+
+// Eliminar de favoritos (DELETE)
+export const fetchDeleteFavorite = async ({
+  username,
+  podcastId,
+}: {
+  username: string;
+  podcastId: string;
+}) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${encodeURIComponent(username)}`;
+
+  const response = await fetch(endpoint, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify({ podcast: podcastId }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al eliminar favorito");
+  }
+
+  return await response.json();
 };
