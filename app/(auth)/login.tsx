@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
     Image,
     Keyboard,
     KeyboardAvoidingView,
@@ -19,15 +18,29 @@ import Toast from 'react-native-toast-message';
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [errors, setErrors] = useState({ email: false, password: false });
+    const [errors, setErrors] = useState({ username: false, password: false });
     const [keyboardVisible, setKeyboardVisible] = useState(false);
 
     useEffect(() => {
         const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
         const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+
+        const loadUser = async () => {
+            const usuarioStr = await AsyncStorage.getItem("usuario");
+            const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+            if (!usuario?.username) throw new Error("No username found");
+            const savedUsername = usuario?.username;
+
+
+            const remember = await AsyncStorage.getItem('rememberMe');
+            if (savedUsername) setUsername(savedUsername); // o setUsername, si usás otra variable
+            if (remember === 'true') setRememberMe(true);
+        };
+
+        loadUser();
 
         return () => {
             showSub.remove();
@@ -37,7 +50,7 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         const newErrors = {
-            email: !email,
+            username: !username,
             password: !password,
         };
 
@@ -52,12 +65,14 @@ export default function LoginScreen() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    username: email,
+                    username: username,
                     password: password,
                 }),
             });
 
             const data = await response.json();
+            const usuario = data.user[0];
+
 
             if (!response.ok) {
                 Toast.show({
@@ -68,32 +83,31 @@ export default function LoginScreen() {
                 return;
             }
 
-            if (data.user && data.user.length > 0) {
-                const usuario = data.user[0];
-                if (rememberMe) {
-                    await AsyncStorage.setItem('userEmail', email);
-                    await AsyncStorage.setItem("username", email);
-                } else {
-                    await AsyncStorage.removeItem('userEmail');
-                    await AsyncStorage.removeItem("username");
-
-                }
-                await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
-                router.push('/(tabs)/home');
+            await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
+            if (rememberMe) {
+                await AsyncStorage.setItem('rememberMe', 'true');
             } else {
-                Alert.alert('Error', 'Login inválido');
+                await AsyncStorage.removeItem("rememberMe");
             }
+
+            router.push('/(tabs)/home');
+
+
         } catch (error) {
-            Alert.alert('Error', 'No se pudo conectar al servidor');
+            Toast.show({
+                type: 'error',
+                text1: 'Login inválido',
+                text2: 'No se pudo conectar con el servidor',
+            });
             console.error(error);
         }
     };
 
     useEffect(() => {
         const loadRememberedEmail = async () => {
-            const storedEmail = await AsyncStorage.getItem('userEmail');
-            if (storedEmail) {
-                setEmail(storedEmail);
+            const storedUsername = await AsyncStorage.getItem('username');
+            if (storedUsername) {
+                setUsername(storedUsername);
                 setRememberMe(true);
             }
         };
@@ -125,13 +139,13 @@ export default function LoginScreen() {
 
                         <TextInput
                             className={`bg-[#1f1f1f] text-white px-4 py-3 rounded-xl mb-6 font-inter border ${
-                                errors.email ? 'border-red-400' : 'border-transparent'
+                                errors.username ? 'border-red-400' : 'border-transparent'
                             }`}
-                            placeholder="Usuario o Email"
+                            placeholder="Usuario"
                             placeholderTextColor="#888"
-                            value={email}
+                            value={username}
                             onChangeText={(text) => {
-                                setEmail(text);
+                                setUsername(text);
                                 if (text) setErrors((e) => ({ ...e, email: false }));
                             }}
                             keyboardType="email-address"
@@ -172,7 +186,7 @@ export default function LoginScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        {(errors.email || errors.password) && (
+                        {(errors.username || errors.password) && (
                             <Text className="text-red-400 text-center mb-4 font-inter">
                                 Completá todos los campos obligatorios
                             </Text>

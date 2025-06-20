@@ -8,11 +8,21 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 const Profile = () => {
   const router = useRouter();
 
+
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("usuario");
-    await AsyncStorage.removeItem("userName");
-    await AsyncStorage.removeItem("userEmail");
-    router.replace("/");
+    const rememberMe = await AsyncStorage.getItem('rememberMe');
+    const usuarioStr = await AsyncStorage.getItem("usuario");
+
+    await AsyncStorage.clear();
+
+    if (rememberMe === 'true' && usuarioStr) {
+      await AsyncStorage.setItem('usuario', usuarioStr);
+      await AsyncStorage.setItem('rememberMe', 'true');
+    } else if (usuarioStr) {
+      await AsyncStorage.setItem('usuario', usuarioStr);
+    }
+
+    router.replace('/(auth)/login');
   };
 
   return (

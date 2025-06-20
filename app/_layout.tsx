@@ -1,8 +1,8 @@
 import { Inter_400Regular, Inter_700Bold, useFonts } from "@expo-google-fonts/inter";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
-import Toast from 'react-native-toast-message';
 import '../global.css';
+import Toast from 'react-native-toast-message'
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -35,7 +35,8 @@ export default function RootLayout() {
     <Stack.Screen name="podcast/[id]" options={{ headerShown: false }} />
     <Stack.Screen name="episodio/[id]" options={{ headerShown: false }} />
     <Stack.Screen name="listas/[id]" options={{ headerShown: false }} />
+    <Stack.Screen name="profile/recomendaciones" options={{ headerShown: false }} />
   </Stack>
-  <Toast />
+          <Toast />
       </>)
 }
