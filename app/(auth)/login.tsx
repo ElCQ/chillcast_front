@@ -1,20 +1,20 @@
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-    View,
+    Alert,
+    Image,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    Image,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
     TouchableWithoutFeedback,
-    Keyboard,
-    ScrollView
+    View
 } from 'react-native';
-import { useState, useEffect } from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
 export default function LoginScreen() {
@@ -72,8 +72,11 @@ export default function LoginScreen() {
                 const usuario = data.user[0];
                 if (rememberMe) {
                     await AsyncStorage.setItem('userEmail', email);
+                    await AsyncStorage.setItem("username", email);
                 } else {
                     await AsyncStorage.removeItem('userEmail');
+                    await AsyncStorage.removeItem("username");
+
                 }
                 await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
                 router.push('/(tabs)/home');

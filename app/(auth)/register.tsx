@@ -85,6 +85,7 @@ export default function RegisterScreen() {
 
             // Guardar username para usar después (géneros)
             await AsyncStorage.setItem('usuario', usuario);
+            await AsyncStorage.setItem("username", email);
 
             router.push('/(auth)/generosIniciales');
         } catch (error) {

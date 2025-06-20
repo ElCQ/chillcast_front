@@ -31,3 +31,15 @@ export interface Reseña {
   valoracion: number;
   texto: string;
 }
+
+export interface User {
+  _id: string;
+  activo: boolean;
+  apellido: string;
+  nombre: string;
+  email: string;
+  username: string;
+  fecha_alta: string;
+  generos: string[];
+  generos_fav: string[];
+}

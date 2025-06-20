@@ -1,23 +1,60 @@
 import CardContainer from "@/components/cardContainer";
 import SearchBar from "@/components/SearchBar";
-import { fetchPodcastsFilters } from "@/services/chillastApi";
-import useFetch from "@/services/useFetch";
-import { useFocusEffect } from '@react-navigation/native';
+import { Podcast, User } from "@/interfaces/interfaces";
+import { fetchPodcastsFilters, fetchUserData } from "@/services/chillastApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import React from "react";
-import { ActivityIndicator, BackHandler, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  BackHandler,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 
 const Home = () => {
   const router = useRouter();
 
-  const { data, loading, error } = useFetch(() =>
-    fetchPodcastsFilters({ genero: "Cultura y Sociedad" })
-  );
+  const [userData, setUserData] = useState<User | null>(null);
+  const [podcasts, setPodcasts] = useState<Podcast[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const firstTen = data?.slice(0, 10);
-  const firstTen2 = data?.slice(10, 20);
-  const firstTen3 = data?.slice(20, 30);
+  useEffect(() => {
+    const fetchAll = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Get user from AsyncStorage
+        const usuarioStr = await AsyncStorage.getItem("usuario");
+        const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+        if (!usuario?.username) throw new Error("No username found");
 
+        // Fetch user data
+        const user = await fetchUserData({ username: usuario.username });
+        setUserData(user);
+
+        // Fetch podcasts with filters (example: genero as array)
+        const podcastsData = await fetchPodcastsFilters({
+          genero: ["Historia"], // or any filters you want
+        });
+        setPodcasts(podcastsData);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("error"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAll();
+  }, []);
+
+
+  const firstTen = podcasts?.slice(0, 5);
+  const firstTen2 = podcasts?.slice(5, 10);
+  const firstTen3 = podcasts?.slice(10, 15);
 
   return (
     <View className="bg-[#282828] flex-1 items-center justify-start gap-5 pt-10">
@@ -69,22 +106,21 @@ const Home = () => {
   );
 };
 export default function HomeScreen() {
-    useFocusEffect(
-        React.useCallback(() => {
-            const onBackPress = () => {
-                // No hace nada
-                return true;
-            };
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // No hace nada
+        return true;
+      };
 
-            const backHandler = BackHandler.addEventListener(
-                'hardwareBackPress',
-                onBackPress
-            );
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
 
-            return () => backHandler.remove();
-        }, [])
-    );
+      return () => backHandler.remove();
+    }, [])
+  );
 
-    return <Home />;
+  return <Home />;
 }
-

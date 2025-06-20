@@ -39,6 +39,9 @@ const Informacion = ({ data }: { data: Episode }) => {
     <View className="gap-2">
       <ExpandableSection titulo="Descripción">
         <Text className="text-white text-sm px-5 py-2 mt-5">
+          Titulo: {data.title}
+        </Text>
+        <Text className="text-white text-sm px-5 py-2">
           Dia emitido: {data.release_date}
         </Text>
         <Text className="text-white text-sm px-5 py-2">
@@ -46,7 +49,6 @@ const Informacion = ({ data }: { data: Episode }) => {
         </Text>
 
         <Text className="text-white text-sm px-5 py-2">{data.description}</Text>
-
       </ExpandableSection>
 
       {/* <ExpandableSection titulo="Tags y Categorías">

@@ -471,7 +471,7 @@ const Search = () => {
             }}
             contentContainerStyle={{ paddingBottom: 300, paddingTop: 10 }}
             renderItem={({ item }) => (
-              <View>
+              <View className='mt-2'>
                 <PodcastCard data={item} />
               </View>
             )}

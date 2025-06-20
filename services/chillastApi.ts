@@ -1,4 +1,4 @@
-import { Episode, Podcast } from "@/interfaces/interfaces";
+import { Episode, Podcast, User } from "@/interfaces/interfaces";
 
 export const CHILLCAST_CONFIG = {
     BASE_URL: "https://chillcast-backend.onrender.com",
@@ -33,16 +33,19 @@ export const fetchPodcasts = async ({
 export const fetchPodcastsFilters = async (filters: {
   title?: string;
   autores?: string;
-  genero?: string;
+  genero?: string | string[];
   source?: string;
   duracion?: string | number;
-  [key: string]: any; // for flexibility
+  [key: string]: any;
 }): Promise<Podcast[]> => {
-  // Build query string from filters object
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
-      params.append(key, String(value));
+      if (key === "genero" && Array.isArray(value)) {
+        value.forEach((g) => params.append("genero", String(g)));
+      } else {
+        params.append(key, String(value));
+      }
     }
   });
 
@@ -68,9 +71,6 @@ export const fetchUniquePodcast = async ({
 }: {
   id: string | string[];
 }): Promise<Podcast> => {
-
-  console.log(id);
-  
 
   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/podcast/id?id=${id}`;
 
@@ -212,4 +212,25 @@ export const fetchDeleteFavorite = async ({
   }
 
   return await response.json();
+};
+
+
+export const fetchUserData = async ({
+  username,
+}: {
+  username: string;
+}): Promise<User> => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/user-me?username=${encodeURIComponent(username)}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching podcasts", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+  return data.user[0];
 };

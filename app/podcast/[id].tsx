@@ -3,19 +3,18 @@ import BackButton from "@/components/buttons/backButton";
 import FilterTabs from "@/components/filterTabs";
 import { StarRatingTextLg } from "@/components/starRatingText";
 import { Icons } from "@/constants/icons";
-import { fetchUniquePodcast } from "@/services/chillastApi";
+import { fetchAddFavorite, fetchUniquePodcast } from "@/services/chillastApi";
 import useFetch from "@/services/useFetch";
 import { hexToRgba } from "@/utils/colorUtils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Image, ImageBackground, Pressable, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 import Episodios from "./episodios";
 import Informacion from "./informacion";
 import Reseñas from "./reseñas";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from "react-native-toast-message";
-import { fetchAddFavorite } from "@/services/chillastApi";
 const SpotifyLogo = require("../../assets/images/spotifyLogo.png");
 
 const Podcasts = () => {
@@ -88,7 +87,7 @@ const Podcasts = () => {
             hexToRgba("#282828", 0.4),
             "#282828",
           ]}
-          className="rounded-lg px-5 pt-12 pb-8 w-full h-full justify-between gap-3"
+          className="rounded-lg px-5 pt-12 pb-8 w-full h-full justify-between gap-3 "
         >
           <View className="gap-3">
             <BackButton />
@@ -101,6 +100,7 @@ const Podcasts = () => {
                   textShadowOffset: { width: 0, height: 2 },
                   textShadowRadius: 10,
                 }}
+                numberOfLines={4}
               >
                 {data?.title || "Podcast Title"}
               </Text>

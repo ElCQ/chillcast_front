@@ -57,6 +57,7 @@ const Episodio = () => {
                     textShadowOffset: { width: 0, height: 2 },
                     textShadowRadius: 10,
                   }}
+                  numberOfLines={4}
                 >
                   {data?.title || "Podcast Title"}
                 </Text>
