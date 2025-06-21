@@ -1,5 +1,3 @@
-// app/(tabs)/profile.tsx
-
 import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -13,17 +11,31 @@ const Profile = () => {
     const rememberMe = await AsyncStorage.getItem('rememberMe');
     const usuarioStr = await AsyncStorage.getItem("usuario");
 
+    let username = '';
+
+    try {
+      if (usuarioStr) {
+        const usuario = JSON.parse(usuarioStr);
+        username = usuario.username || '';
+      }
+    } catch (error) {
+      console.error("Error al parsear el usuario al hacer logout:", error);
+    }
+
+    // Borrar todo
     await AsyncStorage.clear();
 
+    // Restaurar según la lógica
     if (rememberMe === 'true' && usuarioStr) {
       await AsyncStorage.setItem('usuario', usuarioStr);
       await AsyncStorage.setItem('rememberMe', 'true');
-    } else if (usuarioStr) {
-      await AsyncStorage.setItem('usuario', usuarioStr);
+    } else if (username) {
+      await AsyncStorage.setItem('usuario', JSON.stringify({ username }));
     }
-
+    await AsyncStorage.setItem('logged', 'false');
     router.replace('/(auth)/login');
   };
+
 
   return (
     <View style={styles.container}>

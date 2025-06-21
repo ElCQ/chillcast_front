@@ -15,6 +15,7 @@ import {
     View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import Loader from '@/components/loader';
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -23,6 +24,7 @@ export default function LoginScreen() {
     const [rememberMe, setRememberMe] = useState(false);
     const [errors, setErrors] = useState({ username: false, password: false });
     const [keyboardVisible, setKeyboardVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -34,11 +36,13 @@ export default function LoginScreen() {
             if (!usuario?.username) throw new Error("No username found");
             const savedUsername = usuario?.username;
 
-
             const remember = await AsyncStorage.getItem('rememberMe');
-            if (savedUsername) setUsername(savedUsername); // o setUsername, si usás otra variable
+            if (savedUsername) setUsername(savedUsername);
             if (remember === 'true') setRememberMe(true);
         };
+
+
+
 
         loadUser();
 
@@ -58,6 +62,7 @@ export default function LoginScreen() {
         const hasError = Object.values(newErrors).some(Boolean);
         if (hasError) return;
 
+        setLoading(true);
         try {
             const response = await fetch('https://chillcast-backend.onrender.com/api/v1/auth/login', {
                 method: 'POST',
@@ -71,7 +76,7 @@ export default function LoginScreen() {
             });
 
             const data = await response.json();
-            const usuario = data.user[0];
+
 
 
             if (!response.ok) {
@@ -83,6 +88,9 @@ export default function LoginScreen() {
                 return;
             }
 
+            const usuario = data.user[0];
+
+            await AsyncStorage.setItem('logged', 'true');
             await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
             if (rememberMe) {
                 await AsyncStorage.setItem('rememberMe', 'true');
@@ -100,21 +108,13 @@ export default function LoginScreen() {
                 text2: 'No se pudo conectar con el servidor',
             });
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        const loadRememberedEmail = async () => {
-            const storedUsername = await AsyncStorage.getItem('username');
-            if (storedUsername) {
-                setUsername(storedUsername);
-                setRememberMe(true);
-            }
-        };
-        loadRememberedEmail();
-    }, []);
-
     return (
+        <>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -208,6 +208,8 @@ export default function LoginScreen() {
                 </ScrollView>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
+            <Loader visible={loading} />
+        </>
     );
 }
 

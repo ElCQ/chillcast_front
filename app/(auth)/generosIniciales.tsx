@@ -8,6 +8,7 @@ import {
     Text,
     TouchableOpacity
 } from 'react-native';
+import Loader from '@/components/loader';
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
@@ -21,6 +22,7 @@ export default function WelcomeScreen() {
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [error, setError] = useState(false);
     const fadeAnim = useRef(new Animated.Value(0)).current;
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -35,7 +37,7 @@ export default function WelcomeScreen() {
             setError(false);
             if (prev.includes(genre)) {
                 return prev.filter((g) => g !== genre);
-            } else if (prev.length < 5) {
+            } else if (prev.length < 10) {
                 return [...prev, genre];
             } else {
                 return prev;
@@ -44,16 +46,15 @@ export default function WelcomeScreen() {
     };
 
     const updateUserGenres = async (omit = false) => {
+        setLoading(true);
         try {
-            const usuario = await AsyncStorage.getItem("usuario");
-            console.log(usuario);
-            
-            if (!usuario) throw new Error('Usuario no encontrado');
-
-            //const { username } = JSON.parse(usuario);
+            const usuarioStr = await AsyncStorage.getItem("usuario");
+            const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+            if (!usuario?.username) throw new Error("No username found");
+            const savedUsername = usuario?.username;
 
             const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(usuario)}`,
+                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(savedUsername)}`,
                 {
                     method: 'PUT',
                     headers: {
@@ -72,16 +73,20 @@ export default function WelcomeScreen() {
         } catch (err: any) {
             Alert.alert('Error', err.message);
         }
+        finally {
+            setLoading(false);
+        }
     };
 
     return (
+        <>
         <Animated.View
             style={{ flex: 1, opacity: fadeAnim }}
             className="bg-background px-6 pt-20 pb-20"
         >
             <Text className="text-white text-3xl font-bold mb-2 text-center">Bienvenido!</Text>
             <Text className="text-white mb-10 text-center text-sm">
-                Elegí los géneros que te interesan (máximo 5)
+                Elegí los géneros que te interesan (máximo 10)
             </Text>
 
             <ScrollView
@@ -128,5 +133,7 @@ export default function WelcomeScreen() {
                 <Text className="text-gray-400 text-center font-inter">Omitir</Text>
             </TouchableOpacity>
         </Animated.View>
+            <Loader visible={loading} />
+        </>
     );
 }

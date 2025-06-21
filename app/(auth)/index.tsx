@@ -6,6 +6,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function IntroScreen() {
     const router = useRouter();
+    useEffect(() => {
+        const checkSession = async () => {
+            const isLogged = await AsyncStorage.getItem('logged');
+            console.log(isLogged);
+            if (isLogged === 'true') {
+                router.replace('/(tabs)/home');
+            } else {
+                router.replace('/(auth)/login');
+            }
+        };
+
+        checkSession();
+    }, []);
 
     const items = [
         {
@@ -58,23 +71,6 @@ export default function IntroScreen() {
             ),
         },
     ];
-
-    useEffect(() => {
-        const checkLogin = async () => {
-            const username = await AsyncStorage.getItem('usuario');
-            const rememberMe = await AsyncStorage.getItem('rememberMe');
-
-            if (username && rememberMe === 'true') {
-                router.replace('/(tabs)/home');
-            } else if (username) {
-                router.replace({ pathname: '/(auth)/login', params: { username } });
-            } else {
-                router.replace('/(auth)/login');
-            }
-        };
-
-        checkLogin();
-    }, []);
 
     return (
         <View className="flex-1 items-center justify-center bg-background px-6">

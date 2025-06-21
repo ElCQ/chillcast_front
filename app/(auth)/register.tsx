@@ -10,6 +10,7 @@ import {
     View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import Loader from '@/components/loader';
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -19,6 +20,7 @@ export default function RegisterScreen() {
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
     const [keyboardVisible, setKeyboardVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const [errors, setErrors] = useState({
         nombre: false, usuario: false, email: false, password: false, confirm: false,
@@ -59,6 +61,7 @@ export default function RegisterScreen() {
             return;
         }
 
+        setLoading(true);
         try {
             const response = await fetch('https://chillcast-backend.onrender.com/api/v1/auth/register-user', {
                 method: 'POST',
@@ -83,21 +86,26 @@ export default function RegisterScreen() {
                 return;
             }
 
-            // Guardar username para usar después (géneros)
-            await AsyncStorage.setItem('usuario', usuario);
-            await AsyncStorage.setItem("username", email);
+            const user = data.user[0];
+            await AsyncStorage.setItem('usuario', JSON.stringify(user));
+            await AsyncStorage.setItem('rememberMe', 'true');
+
 
             router.push('/(auth)/generosIniciales');
+
         } catch (error) {
             Toast.show({
                 type: 'error',
                 text1: 'Error de red',
                 text2: 'No se pudo conectar con el servidor',
             });
+        }finally {
+            setLoading(false);
         }
     };
 
     return (
+        <>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <ScrollView
@@ -180,5 +188,7 @@ export default function RegisterScreen() {
                 </ScrollView>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
+            <Loader visible={loading} />
+        </>
     );
 }
