@@ -1,10 +1,10 @@
 import FeedCard from "@/components/cards/feedCard";
 import { Episode, Podcast, User } from "@/interfaces/interfaces";
 import {
-  fetchEpisodesFromPodcast,
+  fetchEpisodeById,
   fetchFavorites,
-  fetchPodcastsFilters,
-  fetchUserData,
+  fetchRecommendations,
+  fetchUserData
 } from "@/services/chillastApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useRef, useState } from "react";
@@ -38,14 +38,17 @@ const Feed = () => {
   useEffect(() => {
     setTimeout(() => {
       if (viewRef.current) {
-        UIManager.measure(
-          findNodeHandle(viewRef.current),
-          (x, y, width, height, pageX, pageY) => {
-            console.log("Container height: " + height);
+        const nodeHandle = findNodeHandle(viewRef.current);
+        if (nodeHandle != null) {
+          UIManager.measure(
+            nodeHandle,
+            (x, y, width, height, pageX, pageY) => {
+              console.log("Container height: " + height);
 
-            setContainerHeight(height);
-          }
-        );
+              setContainerHeight(height);
+            }
+          );
+        }
       }
     }, 500); // Delay to ensure layout is complete
   }, [feeds]);
@@ -63,45 +66,41 @@ const Feed = () => {
         const user = await fetchUserData({ username: usuario.username });
         setUserData(user);
 
-        const podcastsData = await fetchPodcastsFilters({
-          genero: ["Historia"],
+        const podcastsData = await fetchRecommendations({
+          username: user.username,
+          email: user.email
         });
+
         setPodcasts(podcastsData);
 
         const tenLimit = podcasts ? podcasts.slice(0, 3) : [];
 
-        await Promise.all(
-          tenLimit.map(async (pod) => {
-            try {
-              const response = await fetchEpisodesFromPodcast({
-                id: pod.id ? pod.id : pod._id,
-              });
-              //console.log("episodio: " + response[0]);
+        const fetchFirstEpisode = async (pod: Podcast) => {
+          if (!pod.episodes || pod.episodes.length === 0) {
+            return { podcast: pod, episode: null };
+          }
+          try {
+            const response = await fetchEpisodeById({ id: pod.episodes[0]._id });
+            console.log("episodio:  " + response);
+            return { podcast: pod, episode: response };
+          } catch (error) {
+            //console.error(error);
+            return { podcast: pod, episode: null };
+          }
+        };
 
-              return {
-                podcast: pod,
-                episode: response[0],
-              };
-            } catch (error) {
-              setLoading(false);
-              //console.error(error);
-              return {
-                podcast: pod,
-                episode: null,
-              };
-            }
+        setLoading(true);
+        Promise.all(podcastsData!.map(fetchFirstEpisode))
+          .then((results) => {
+            setFeeds(results.filter(Boolean) as Feed[]);
           })
-        ).then((results) => {
-          //console.log("results");
-          //console.log(results);
-
-          setLoading(false);
-          setFeeds(results.filter(Boolean) as Feed[]);
-        });
+          .finally(() => setLoading(false));
 
         const favoritos = await fetchFavorites(user.username);
         setFavoritos(favoritos);
       } catch (err) {
+        console.log(err);
+
         setError(err instanceof Error ? err : new Error("error"));
       } finally {
         setLoading(false);
@@ -118,7 +117,7 @@ const Feed = () => {
     if (viewableItems && viewableItems.length > 0) {
       setActivePodcast(
         (viewableItems[0].item as Feed).podcast.id ||
-          (viewableItems[0].item as Feed).podcast._id
+        (viewableItems[0].item as Feed).podcast._id
       );
     }
   }).current;
@@ -139,7 +138,7 @@ const Feed = () => {
     </View>
   ) : error ? (
     <View className="flex-1 items-center justify-center bg-[#282828]">
-      <Text className="text-white text-xl">Error</Text>
+      <Text className="text-white text-xl">{error.message}</Text>
     </View>
   ) : !feeds ? (
     <View className="flex-1 items-center justify-center bg-[#282828]">

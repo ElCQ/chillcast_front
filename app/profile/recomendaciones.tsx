@@ -1,15 +1,15 @@
+import Loader from '@/components/loader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-    View,
+    Alert,
+    ScrollView,
     Text,
     TouchableOpacity,
-    ScrollView,
-    Alert,
+    View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-import Loader from '@/components/loader';
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
@@ -45,7 +45,7 @@ export default function GenerosUsuariosScreen() {
             const data = await response.json();
             const user = data?.user?.[0];
 
-            const generos = user?.generos ?? []; // Si no hay, pone array vacío
+            const generos = user?.generos_fav ?? []; // Si no hay, pone array vacío
             setSelectedGenres(generos);
 
         } catch (err: any) {

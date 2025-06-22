@@ -30,6 +30,9 @@ const Episodios = ({ dataPodcast }: { dataPodcast: Podcast }) => {
     setSearch(value);
   };
 
+  console.log(dataPodcast.id);
+  
+
   const toggleSection = (key: string) => {
     setExpandedSections((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]

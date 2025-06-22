@@ -1,11 +1,11 @@
 import CardContainer from "@/components/cardContainer";
 import SearchBar from "@/components/SearchBar";
 import { Podcast, User } from "@/interfaces/interfaces";
-import { fetchPodcastsFilters, fetchUserData } from "@/services/chillastApi";
+import { fetchRecommendations, fetchUserData } from "@/services/chillastApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
@@ -18,43 +18,47 @@ const Home = () => {
   const router = useRouter();
 
   const [userData, setUserData] = useState<User | null>(null);
-  const [podcasts, setPodcasts] = useState<Podcast[] | null>(null);
+  const [podcasts1, setPodcasts1] = useState<Podcast[] | null>(null);
+  const [podcasts2, setPodcasts2] = useState<Podcast[] | null>(null);
+  const [podcasts3, setPodcasts3] = useState<Podcast[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Get user from AsyncStorage
-        const usuarioStr = await AsyncStorage.getItem("usuario");
-        const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
-        if (!usuario?.username) throw new Error("No username found");
 
-        // Fetch user data
-        const user = await fetchUserData({ username: usuario.username });
-        setUserData(user);
+  const fetchAll = async (setState: React.Dispatch<React.SetStateAction<Podcast[] | null>>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const usuarioStr = await AsyncStorage.getItem("usuario");
+      const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+      if (!usuario?.username) throw new Error("No username found");
 
-        // Fetch podcasts with filters (example: genero as array)
-        const podcastsData = await fetchPodcastsFilters({
-          genero: ["Historia"], // or any filters you want
-        });
-        setPodcasts(podcastsData);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("error"));
-      } finally {
-        setLoading(false);
-      }
-    };
+      const user = await fetchUserData({ username: usuario.username });
+      setUserData(user);
 
-    fetchAll();
-  }, []);
+      console.log(user.username, user.email);
 
 
-  const firstTen = podcasts?.slice(0, 5);
-  const firstTen2 = podcasts?.slice(5, 10);
-  const firstTen3 = podcasts?.slice(10, 15);
+      const podcastsData = await fetchRecommendations({
+        username: user.username,
+        email: user.email
+      });
+      setState(podcastsData);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("error"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAll(setPodcasts1);
+      fetchAll(setPodcasts2);
+      fetchAll(setPodcasts3);
+    }, [])
+  );
 
   return (
     <View className="bg-[#282828] flex-1 items-center justify-start gap-5 pt-10">
@@ -79,20 +83,20 @@ const Home = () => {
           ) : (
             <>
               <CardContainer
-                datos={firstTen}
+                datos={podcasts1}
                 loading={loading}
                 error={error}
                 nombre="Recomendaciones del dia"
               />
               <CardContainer
-                datos={firstTen2}
+                datos={podcasts2}
                 loading={loading}
                 error={error}
                 nombre="Según tus gustos"
                 color="#5C0055"
               />
               <CardContainer
-                datos={firstTen3}
+                datos={podcasts3}
                 loading={loading}
                 error={error}
                 nombre="Escuchar algo nuevo"

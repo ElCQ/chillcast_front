@@ -11,6 +11,7 @@ export interface Podcast {
   feed_url: string | null;
   language: string;
   source: string;
+  episodes?: Episode[];
 }
 
 export interface Episode {

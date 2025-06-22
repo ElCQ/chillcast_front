@@ -145,6 +145,11 @@ export const fetchFavorites = async (username: string): Promise<Podcast[]> => {
     headers: CHILLCAST_CONFIG.headers,
   });
 
+  if (response.status === 404) {
+    // Si no hay favoritos, devolvemos un array vacío
+    return [];
+  }
+
   if (!response.ok) {
     throw new Error("Error fetching favorites", { cause: response.statusText });
   }
@@ -227,4 +232,29 @@ export const fetchUserData = async ({
 
   const data = await response.json();
   return data.user[0];
+};
+
+export const fetchRecommendations = async ({
+  username,
+  email
+}: {
+  username: string;
+  email: string;
+}): Promise<Podcast[]> => {
+
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/get-recomendations?username=${encodeURIComponent(username)}&email=${encodeURIComponent(email)}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Error fetching podcasts", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+  console.log(data);
+  
+  return data.recomedaciones.generos_fav;
 };

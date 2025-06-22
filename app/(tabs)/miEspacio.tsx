@@ -1,9 +1,11 @@
 import FilterTabs from '@/components/filterTabs'
+import { Podcast } from '@/interfaces/interfaces'
 import { fetchFavorites } from '@/services/chillastApi'
-import useFetch from '@/services/useFetch'
 import { FontAwesome } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const tabs = ['Favoritos', 'Listas', 'Reseñas', 'Historial']
@@ -23,13 +25,37 @@ const listasMock = [
 
 const MiEspacio = () => {
   const [tab, setTab] = useState('Favoritos')
+  const [favorites, setFavorites] = useState<Podcast[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const router = useRouter()
 
-  const username = "preuba8" // Prueba usuario dsp cambiar
+  const fecthData = async () => {
+    const usernameStr = await AsyncStorage.getItem("usuario");
+    const username = usernameStr ? JSON.parse(usernameStr) : null;
+    if (!username?.username) throw new Error("No username found");
 
-  const { data: podcastData, loading, error } = useFetch(() =>
-      fetchFavorites(username)
-  )
+    try {
+      setLoading(true);
+      const data = await fetchFavorites(username.username);
+      setFavorites(data);
+      setLoading(false);
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error("Error fetching favorites"));
+    }
+  }
+
+  useEffect(() => {
+    fecthData();
+  }, [])
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fecthData();
+    }, [])
+  );
+
 
   const cardMargin = 8
   const cardWidth = (Dimensions.get('window').width - 48 - cardMargin) / 2
@@ -102,7 +128,7 @@ const MiEspacio = () => {
             <Text className="text-red-400">{error.message}</Text>
           ) : (
             <View style={{ gap: 16 }}>
-              {podcastData?.map((podcast, idx) => (
+              {favorites?.map((podcast, idx) => (
                 <TouchableOpacity
                   key={podcast._id || idx}
                   activeOpacity={0.8}
@@ -313,7 +339,7 @@ const MiEspacio = () => {
         {/* HISTORIAL */}
         {tab === "Historial" && (
           <View style={{ gap: 16 }}>
-            {podcastData?.slice(0, 2).map((podcast, idx) => (
+            {favorites?.slice(0, 2).map((podcast, idx) => (
               <TouchableOpacity
                 key={podcast._id || idx}
                 activeOpacity={0.8}
