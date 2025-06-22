@@ -68,7 +68,7 @@ const Feed = () => {
         });
         setPodcasts(podcastsData);
 
-        const tenLimit = podcasts ? podcasts.slice(0, 10) : [];
+        const tenLimit = podcasts ? podcasts.slice(0, 3) : [];
 
         await Promise.all(
           tenLimit.map(async (pod) => {
