@@ -184,7 +184,7 @@ export default function ListaDetalle() {
                 </Text>
               </View>
               <View style={{ flexDirection: "row", marginTop: 4 }}>
-                {podcast.generos.map((g, i) => (
+                {podcast.genero.map((g, i) => (
                   <Text
                     key={i}
                     style={{
