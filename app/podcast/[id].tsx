@@ -15,6 +15,7 @@ import Toast from "react-native-toast-message";
 import Episodios from "./episodios";
 import Informacion from "./informacion";
 import Reseñas from "./reseñas";
+
 const SpotifyLogo = require("../../assets/images/spotifyLogo.png");
 
 const Podcasts = () => {
@@ -22,25 +23,18 @@ const Podcasts = () => {
   const [activeTab, setActiveTab] = useState("Información");
   const tabs = ["Información", "Episodios", "Reseñas"];
 
-  console.log("a: " + id);
-  
-
-  const { data, loading, error } = useFetch(() =>
-    fetchUniquePodcast({ id: id })
-  );
-
-  console.log(data);
+  const { data, loading, error } = useFetch(() => fetchUniquePodcast({ id }));
 
   const handleAddToFavorites = async () => {
     console.log("Click en añadir a favoritos");
 
     try {
       const usuarioStr = await AsyncStorage.getItem("usuario");
-      const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+      if (!usuarioStr) throw new Error("No se encontró usuario autenticado");
 
-      if (!usuario || !usuario.username) {
-        throw new Error("No estás autenticado");
-      }
+      const usuario = JSON.parse(usuarioStr);
+
+      if (!usuario.username) throw new Error("Usuario inválido");
 
       const podcastId = Array.isArray(id) ? id[0] : id;
 
@@ -58,23 +52,36 @@ const Podcasts = () => {
       Toast.show({
         type: "error",
         text1: "Error",
-        text2:
-          err instanceof Error
-            ? err.message
-            : "Error al agregar a favoritos",
+        text2: err instanceof Error ? err.message : "Error al agregar a favoritos",
       });
     }
   };
 
-  return loading ? (
-    <View className="flex-1 items-center justify-center bg-[#282828]">
-      <ActivityIndicator size="large" color="#fff" />
-    </View>
-  ) : error ? (
-    <View className="flex-1 items-center justify-center bg-[#282828]">
-      <Text className="text-red-400 text-lg">{error.message}</Text>
-    </View>
-  ) : data ? (
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#282828]">
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#282828]">
+        <Text className="text-red-400 text-lg">{error.message}</Text>
+      </View>
+    );
+  }
+
+  if (!data) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#282828]">
+        <Text className="text-red-400 text-lg">No se encontró el podcast</Text>
+      </View>
+    );
+  }
+
+  return (
     <View className="flex-1 items-center justify-top bg-[#282828]">
       <ImageBackground
         source={{ uri: data?.image || "https://via.placeholder.com/180x280" }}
@@ -87,11 +94,10 @@ const Podcasts = () => {
             hexToRgba("#282828", 0.4),
             "#282828",
           ]}
-          className="rounded-lg px-5 pt-12 pb-8 w-full h-full justify-between gap-3 "
+          className="rounded-lg px-5 pt-12 pb-8 w-full h-full justify-between gap-3"
         >
           <View className="gap-3">
             <BackButton />
-
             <View className="flex-row justify-between">
               <Text
                 className="text-white text-3xl flex-1 font-semibold"
@@ -104,11 +110,9 @@ const Podcasts = () => {
               >
                 {data?.title || "Podcast Title"}
               </Text>
-
               <StarRatingTextLg rating={3.8} />
             </View>
           </View>
-
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center justify-start gap-5">
               <AddButton
@@ -119,10 +123,9 @@ const Podcasts = () => {
               <AddButton
                 label="Añadir a lista"
                 icon={Icons.FolderPlusIcon}
-                onPress={() => console.log("Añadido a favoritos")}
+                onPress={() => console.log("Añadido a lista")}
               />
             </View>
-
             {data.source === "Spotify" && (
               <Pressable>
                 <Image source={SpotifyLogo} className="size-8" />
@@ -131,24 +134,14 @@ const Podcasts = () => {
           </View>
         </LinearGradient>
       </ImageBackground>
-
       <View className="w-full h-fit px-6 my-2 items-start justify-start">
-        <FilterTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+        <FilterTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       </View>
-
       <View className="flex-1 w-full">
         {activeTab === "Información" && <Informacion data={data} />}
         {activeTab === "Episodios" && <Episodios dataPodcast={data} />}
         {activeTab === "Reseñas" && <Reseñas data={data} />}
       </View>
-    </View>
-  ) : (
-    <View className="flex-1 items-center justify-center bg-[#282828]">
-      <Text className="text-red-400 text-lg">No se encontró el podcast</Text>
     </View>
   );
 };

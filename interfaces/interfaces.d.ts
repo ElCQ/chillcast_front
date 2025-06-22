@@ -7,7 +7,7 @@ export interface Podcast {
   description: string;
   image: string;
   autores: string[];
-  generos: string[];
+  genero: string[];
   feed_url: string | null;
   language: string;
   source: string;

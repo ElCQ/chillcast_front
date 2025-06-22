@@ -137,20 +137,20 @@ export const fetchEpisodeById = async ({
 
 // Obtener favoritos (GET)
 export const fetchFavorites = async (username: string): Promise<Podcast[]> => {
+
   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${encodeURIComponent(username)}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
-    headers: {
-      accept: "application/json",
-    },
+    headers: CHILLCAST_CONFIG.headers,
   });
 
   if (!response.ok) {
-    throw new Error("Error al obtener los favoritos");
+    throw new Error("Error fetching favorites", { cause: response.statusText });
   }
 
   const data = await response.json();
+
   return data.favorites;
 };
 
@@ -167,25 +167,19 @@ export const fetchAddFavorite = async ({
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
+      ...CHILLCAST_CONFIG.headers,
       "Content-Type": "application/json",
-      accept: "application/json",
     },
     body: JSON.stringify({ podcast: podcastId }),
   });
 
-  const text = await response.text();
-
   if (!response.ok) {
-    console.error("Error al agregar favorito", text);
-    throw new Error(`Error al agregar favorito: ${text}`);
+    const errorText = await response.text();
+    throw new Error(`Error al agregar favorito: ${errorText}`);
   }
 
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    console.error("Error parseando JSON en agregar favorito:", error, "Texto:", text);
-    throw new Error("Respuesta inválida del servidor al agregar favorito");
-  }
+  const data = await response.json();
+  return data;
 };
 
 // Eliminar de favoritos (DELETE)

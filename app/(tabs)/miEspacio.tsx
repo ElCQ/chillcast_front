@@ -1,5 +1,5 @@
 import FilterTabs from '@/components/filterTabs'
-import { fetchPodcastsFilters } from '@/services/chillastApi'
+import { fetchFavorites } from '@/services/chillastApi'
 import useFetch from '@/services/useFetch'
 import { FontAwesome } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
@@ -21,14 +21,14 @@ const listasMock = [
   },
 ]
 
-const defaultGenres = ['Género', 'Género', 'Género']
-
 const MiEspacio = () => {
   const [tab, setTab] = useState('Favoritos')
   const router = useRouter()
 
+  const username = "preuba8" // Prueba usuario dsp cambiar
+
   const { data: podcastData, loading, error } = useFetch(() =>
-        fetchPodcastsFilters({ genero: "Cultura y Sociedad" })
+      fetchFavorites(username)
   )
 
   const cardMargin = 8
@@ -85,7 +85,7 @@ const MiEspacio = () => {
           )}
         </View>
       </View>
-      {/* SOLO SCROLL EN LAS CARDS */}
+
       <ScrollView
         contentContainerStyle={{
           paddingTop: 0,
@@ -94,6 +94,7 @@ const MiEspacio = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
+        {/* FAVORITOS */}
         {tab === "Favoritos" &&
           (loading ? (
             <ActivityIndicator size="large" color="#fff" />
@@ -101,14 +102,12 @@ const MiEspacio = () => {
             <Text className="text-red-400">{error.message}</Text>
           ) : (
             <View style={{ gap: 16 }}>
-              {podcastData?.slice(0, 5).map((podcast, idx) => (
+              {podcastData?.map((podcast, idx) => (
                 <TouchableOpacity
-                  key={podcast.id ? podcast.id : podcast._id || idx}
+                  key={podcast._id || idx}
                   activeOpacity={0.8}
                   onPress={() =>
-                    router.push(
-                      `/podcast/${podcast.id ? podcast.id : podcast._id}`
-                    )
+                    router.push(`/podcast/${podcast._id}`)
                   }
                   style={{
                     flexDirection: "row",
@@ -170,30 +169,34 @@ const MiEspacio = () => {
                         {podcast.title}
                       </Text>
                     </View>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginBottom: 4,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "#D0D0D0",
-                          fontSize: 14,
-                          flex: 1,
-                          fontFamily: "System",
-                        }}
-                        numberOfLines={1}
-                      >
-                        {podcast.description || "Podcast"}
-                      </Text>
-                      <FontAwesome
-                        name="star"
-                        size={14}
-                        color="#FFD600"
-                        style={{ marginLeft: 8, marginRight: 2 }}
-                      />
+                    {/* Género y calificación juntos */}
+                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+                      {podcast.genero && podcast.genero.length > 0 && (
+                        <View
+                          style={{
+                            backgroundColor: "#2ECC71",
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 16,
+                            marginRight: 8,
+                            maxWidth: 120,
+                            flexShrink: 1,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: "white",
+                              fontSize: 14,
+                              fontFamily: "System",
+                            }}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                          >
+                            {podcast.genero[0]}
+                          </Text>
+                        </View>
+                      )}
+                      <FontAwesome name="star" size={14} color="#FFD600" style={{ marginRight: 4 }} />
                       <Text
                         style={{
                           color: "white",
@@ -205,32 +208,13 @@ const MiEspacio = () => {
                         {"5"}/5
                       </Text>
                     </View>
-                    <View style={{ flexDirection: "row", marginTop: 4 }}>
-                      {podcast.generos.map((g, i) => (
-                        <Text
-                          key={i}
-                          style={{
-                            backgroundColor: "#2ECC71",
-                            color: "white",
-                            paddingHorizontal: 10,
-                            paddingVertical: 4,
-                            borderRadius: 16,
-                            fontSize: 13,
-                            marginRight: 8,
-                            overflow: "hidden",
-                            fontFamily: "System",
-                          }}
-                          numberOfLines={1}
-                        >
-                          {g}
-                        </Text>
-                      ))}
-                    </View>
                   </View>
                 </TouchableOpacity>
               ))}
             </View>
           ))}
+
+        {/* LISTAS */}
         {tab === "Listas" && (
           <View
             style={{
@@ -315,6 +299,8 @@ const MiEspacio = () => {
             ))}
           </View>
         )}
+
+        {/* RESEÑAS */}
         {tab === "Reseñas" && (
           <Text
             className="text-white text-center mt-10"
@@ -323,16 +309,16 @@ const MiEspacio = () => {
             Aca van tus reseñas
           </Text>
         )}
+
+        {/* HISTORIAL */}
         {tab === "Historial" && (
           <View style={{ gap: 16 }}>
             {podcastData?.slice(0, 2).map((podcast, idx) => (
               <TouchableOpacity
-                key={podcast.id ? podcast.id : podcast._id || idx}
+                key={podcast._id || idx}
                 activeOpacity={0.8}
                 onPress={() =>
-                  router.push(
-                    `/podcast/${podcast.id ? podcast.id : podcast._id}`
-                  )
+                  router.push(`/podcast/${podcast._id}`)
                 }
                 style={{
                   flexDirection: "row",
@@ -386,30 +372,44 @@ const MiEspacio = () => {
                   >
                     {podcast.title}
                   </Text>
-                  <Text
-                    style={{
-                      color: "#D0D0D0",
-                      fontSize: 14,
-                      fontFamily: "System",
-                      marginBottom: 6,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {podcast.description || "Podcast"}
-                  </Text>
-                  <Text
-                    style={{
-                      color: "#D0D0D0",
-                      fontSize: 13,
-                      fontFamily: "System",
-                    }}
-                    numberOfLines={1}
-                  >
-                    Visitado por última vez:{" "}
-                    <Text style={{ color: "#fff", fontWeight: "bold" }}>
-                      {"Sin datos"}
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    {podcast.genero && podcast.genero.length > 0 && (
+                      <View
+                        style={{
+                          backgroundColor: "#2ECC71",
+                          paddingHorizontal: 8,
+                          paddingVertical: 4,
+                          borderRadius: 16,
+                          marginRight: 8,
+                          maxWidth: 120,
+                          flexShrink: 1,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "white",
+                            fontSize: 14,
+                            fontFamily: "System",
+                          }}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {podcast.genero[0]}
+                        </Text>
+                      </View>
+                    )}
+                    <FontAwesome name="star" size={14} color="#FFD600" style={{ marginRight: 4 }} />
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: 13,
+                        fontFamily: "System",
+                      }}
+                    >
+                      {"5"}/5
                     </Text>
-                  </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
             ))}
@@ -417,7 +417,7 @@ const MiEspacio = () => {
         )}
       </ScrollView>
     </View>
-  );
+  )
 }
 
 export default MiEspacio
