@@ -254,7 +254,6 @@ export const fetchRecommendations = async ({
   }
 
   const data = await response.json();
-  console.log(data);
   
   return data.recomedaciones.generos_fav;
 };

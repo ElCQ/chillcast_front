@@ -28,7 +28,6 @@ const Feed = () => {
   const [activePodcast, setActivePodcast] = useState("");
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
-  const [podcasts, setPodcasts] = useState<Podcast[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [favoritos, setFavoritos] = useState<Podcast[]>([]);
@@ -65,42 +64,8 @@ const Feed = () => {
 
         const user = await fetchUserData({ username: usuario.username });
         setUserData(user);
-
-        const podcastsData = await fetchRecommendations({
-          username: user.username,
-          email: user.email
-        });
-
-        setPodcasts(podcastsData);
-
-        const tenLimit = podcasts ? podcasts.slice(0, 3) : [];
-
-        const fetchFirstEpisode = async (pod: Podcast) => {
-          if (!pod.episodes || pod.episodes.length === 0) {
-            return { podcast: pod, episode: null };
-          }
-          try {
-            const response = await fetchEpisodeById({ id: pod.episodes[0]._id });
-            console.log("episodio:  " + response);
-            return { podcast: pod, episode: response };
-          } catch (error) {
-            //console.error(error);
-            return { podcast: pod, episode: null };
-          }
-        };
-
-        setLoading(true);
-        Promise.all(podcastsData!.map(fetchFirstEpisode))
-          .then((results) => {
-            setFeeds(results.filter(Boolean) as Feed[]);
-          })
-          .finally(() => setLoading(false));
-
-        const favoritos = await fetchFavorites(user.username);
-        setFavoritos(favoritos);
       } catch (err) {
         console.log(err);
-
         setError(err instanceof Error ? err : new Error("error"));
       } finally {
         setLoading(false);
@@ -110,17 +75,72 @@ const Feed = () => {
     fetchAll();
   }, []);
 
-  // Callback para FlatList
-  const onViewableItemsChanged = React.useRef<
-    ({ viewableItems }: { viewableItems: Array<ViewToken> }) => void
-  >(({ viewableItems }) => {
-    if (viewableItems && viewableItems.length > 0) {
-      setActivePodcast(
-        (viewableItems[0].item as Feed).podcast.id ||
-        (viewableItems[0].item as Feed).podcast._id
-      );
+  useEffect(() => {
+    if (userData) {
+      setLoading(true);
+      fetchFeeds();
+      setLoading(false);
     }
-  }).current;
+  }, [userData]);
+
+  const fetchFeeds = async () => {
+    if (!userData) {
+      console.error("User data is not available");
+      return;
+    }
+
+    const podcastsData = await fetchRecommendations({
+      username: userData.username,
+      email: userData.email
+    });
+
+    const fetchFirstEpisode = async (pod: Podcast) => {
+      console.log(pod.episodes);
+      
+      if (!pod.episodes || pod.episodes.length === 0) {
+        return { podcast: pod, episode: null };
+      }
+      try {
+        
+        const response = await fetchEpisodeById({ id: pod.episodes[0] });
+        console.log("episodio:  " + response);
+        return { podcast: pod, episode: response };
+      } catch (error) {
+        console.error(error, "Error fetching episode for podcast:", pod.id, pod.episodes[0]);
+        return { podcast: pod, episode: null };
+      }
+    };
+
+    Promise.all(podcastsData!.map(fetchFirstEpisode))
+      .then((results) => {
+        setFeeds(feeds.concat(results.filter(Boolean) as Feed[]));
+      })
+
+    const favoritos = await fetchFavorites(userData.username);
+    setFavoritos(favoritos);
+  }
+
+  // Callback para FlatList
+  const onViewableItemsChanged = React.useCallback(
+    async ({ viewableItems }: { viewableItems: Array<ViewToken> }) => {
+      if (viewableItems && viewableItems.length > 0) {
+        setActivePodcast(
+          (viewableItems[0].item as Feed).podcast.id ||
+          (viewableItems[0].item as Feed).podcast._id
+        );
+      }
+
+      console.log("Active podcast ID: ", viewableItems[0]?.index, feeds.length);
+
+      if (
+        viewableItems[0]?.index === feeds.length - 1 &&
+        viewableItems[0]?.isViewable
+      ) {
+        //await fetchFeeds();
+      }
+    },
+    [feeds] // Dependencia para que siempre tenga el valor actualizado
+  );
 
   // Configuración para FlatList
   const viewabilityConfig = {

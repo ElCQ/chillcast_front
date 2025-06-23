@@ -5,7 +5,7 @@ import { fetchRecommendations, fetchUserData } from "@/services/chillastApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
@@ -51,14 +51,12 @@ const Home = () => {
     }
   };
 
+  useEffect(() => {
+    fetchAll(setPodcasts1);
+    fetchAll(setPodcasts2);
+    fetchAll(setPodcasts3);
+  }, [])
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchAll(setPodcasts1);
-      fetchAll(setPodcasts2);
-      fetchAll(setPodcasts3);
-    }, [])
-  );
 
   return (
     <View className="bg-[#282828] flex-1 items-center justify-start gap-5 pt-10">

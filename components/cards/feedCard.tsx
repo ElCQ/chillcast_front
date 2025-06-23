@@ -34,17 +34,22 @@ const FeedCard = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playable, setPlayable] = useState(false);
   const [openDescription, setOpenDescription] = useState(false);
   const [favoritoActual, setFavoritoActual] = useState(favorite);
 
+
+
+
   const player =
-    feed.episode && feed.episode.audio_url
+    feed.episode && feed.episode.audio_url && feed.episode.audio_url.match(/^(https?:\/\/.*\.(?:mp3|wav|ogg|m4a|aac))$/i)
       ? useAudioPlayer(feed.episode.audio_url)
-      : null;
+      : useAudioPlayer();
+
 
   const handlePlayPause = () => {
-    if (!player) return;
-    if (activePodcast != feed.podcast.id) return;
+    if (!player.isLoaded) return;
+    if (activePodcast != feed.podcast._id) return;
 
     if (isPlaying) {
       player.pause();
@@ -56,14 +61,15 @@ const FeedCard = ({
   };
 
   const handleFowardBackward = (cantidad: number) => {
-    if (!player) return;
+    if (!player.isLoaded) return;
     player.seekTo(player.currentTime + cantidad);
   };
 
   const handleRedirect = (url: Href) => {
-    if (!player) return;
-    player.pause();
-    setIsPlaying(false);
+    if (player.isLoaded) {
+      player.pause();
+      setIsPlaying(false);
+    }
     router.push(url);
   };
 
@@ -124,9 +130,9 @@ const FeedCard = ({
 
   useEffect(() => {
     let isMounted = true;
-    if (!player) return;
+    if (!player.isLoaded) return;
 
-    if (activePodcast === feed.podcast.id && !isPlaying) {
+    if (activePodcast === feed.podcast._id && !isPlaying) {
       player.play();
       setIsPlaying(true);
     }
@@ -142,7 +148,7 @@ const FeedCard = ({
           player.seekTo(0);
         }
 
-        if (isPlaying && activePodcast !== feed.podcast.id) {
+        if (isPlaying && activePodcast !== feed.podcast._id) {
           player.pause();
           setIsPlaying(false);
         }
@@ -157,7 +163,7 @@ const FeedCard = ({
     return () => {
       isMounted = false;
       listener.remove && listener.remove();
-      if (player) {
+      if (player.isLoaded) {
         try {
           player.pause();
         } catch (e) {
@@ -210,7 +216,7 @@ const FeedCard = ({
                   </Text>
               </TouchableOpacity>
 
-              {player && feed.episode != null ? (
+              {player.isLoaded && feed.episode != null ? (
                 <>
                   <View className="flex flex-row gap-2 my-2">
                     <AntDesign name="sound" size={18} color="#a3a3a3" />
@@ -280,7 +286,7 @@ const FeedCard = ({
                 onPress={() =>
                   handleRedirect(
                     `/podcast/${
-                      feed.podcast?.id ? feed.podcast.id : feed.podcast?._id
+                      feed.podcast._id
                     }`
                   )
                 }
@@ -297,7 +303,7 @@ const FeedCard = ({
         </LinearGradient>
       </ImageBackground>
 
-      {player && feed.episode != null ? (
+      {player.isLoaded && feed.episode != null ? (
         <View className="absolute justify-center items-center top-1/2 left-1/3">
           <View className="flex flex-row gap-4 justify-center items-center">
             <TouchableOpacity
