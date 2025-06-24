@@ -1,7 +1,8 @@
-import { fetchPodcastsFilters } from '@/services/chillastApi'
-import useFetch from '@/services/useFetch'
+import { fetchLista, fetchUniquePodcast } from '@/services/chillastApi'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { FontAwesome } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export const options = {
@@ -11,9 +12,44 @@ export const options = {
 export default function ListaDetalle() {
   const { id } = useLocalSearchParams()
   const router = useRouter()
-  const { data: podcastData, loading } = useFetch(() =>
-    fetchPodcastsFilters({ genero: "Cultura y Sociedad" })
-  );
+
+  const [username, setUsername] = useState(null)
+  const [podcasts, setPodcasts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadUsername() {
+      const storedUser = await AsyncStorage.getItem("usuario")
+      const user = storedUser ? JSON.parse(storedUser) : null
+      if (user?.username) setUsername(user.username)
+    }
+    loadUsername()
+  }, [])
+
+  useEffect(() => {
+    if (!username || !id) return
+
+    async function loadLista() {
+      setLoading(true)
+      try {
+        const listaData = await fetchLista(username, id)
+        if (listaData?.podcast?.length > 0) {
+          const podcastsData = await Promise.all(
+            listaData.podcast.map((pid) => fetchUniquePodcast({ id: pid }))
+          )
+          setPodcasts(podcastsData)
+        } else {
+          setPodcasts([])
+        }
+      } catch (error) {
+        console.error(error)
+        setPodcasts([])
+      }
+      setLoading(false)
+    }
+
+    loadLista()
+  }, [username, id])
 
   if (loading) {
     return (
@@ -23,13 +59,13 @@ export default function ListaDetalle() {
     )
   }
 
-  if (!podcastData || podcastData.length === 0) {
+  if (podcasts.length === 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#232323' }} />
+      <View style={{ flex: 1, backgroundColor: '#232323', justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: 'white' }}>No hay podcasts en esta lista.</Text>
+      </View>
     )
   }
-
-  const firstTen = podcastData.slice(0, 10);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#232323" }}>
@@ -39,7 +75,7 @@ export default function ListaDetalle() {
           alignItems: "center",
           paddingTop: 50,
           paddingHorizontal: 20,
-          marginBottom: 10,
+          marginBottom: 30,
         }}
       >
         <TouchableOpacity
@@ -61,29 +97,9 @@ export default function ListaDetalle() {
         </Text>
         <View style={{ width: 34 }} />
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 20,
-          marginTop: 20,
-          marginBottom: 18,
-        }}
-      >
-        <FontAwesome
-          name="sliders"
-          size={18}
-          color="#fff"
-          style={{ marginRight: 8 }}
-        />
-        <Text style={{ color: "white", fontFamily: "System", fontSize: 16 }}>
-          Ordenar y Filtrar
-        </Text>
-      </View>
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 30 }}
-      >
-        {firstTen.map((podcast) => (
+
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 30 }}>
+        {podcasts.map((podcast) => (
           <TouchableOpacity
             key={podcast.id ? podcast.id : podcast._id}
             activeOpacity={0.8}
@@ -94,7 +110,7 @@ export default function ListaDetalle() {
               flexDirection: "row",
               backgroundColor: "#393939",
               borderRadius: 18,
-              marginBottom: 18,
+              marginBottom: 16,
               alignItems: "center",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -107,9 +123,13 @@ export default function ListaDetalle() {
             }}
           >
             <Image
-              source={{ uri: podcast.image }}
+              source={
+                podcast.image
+                  ? { uri: podcast.image }
+                  : require("@/assets/images/podcastImage.png")
+              }
               style={{
-                width: 100, // MÁS ANCHO
+                width: 100,
                 height: "100%",
                 borderTopLeftRadius: 18,
                 borderBottomLeftRadius: 18,
@@ -126,86 +146,56 @@ export default function ListaDetalle() {
                 height: "100%",
               }}
             >
-              <View
+              <Text
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: 18,
+                  fontFamily: "System",
                   marginBottom: 2,
                 }}
+                numberOfLines={1}
               >
+                {podcast.title}
+              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {podcast.generos && podcast.generos.length > 0 && (
+                  <View
+                    style={{
+                      backgroundColor: "#2ECC71",
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 16,
+                      marginRight: 8,
+                      maxWidth: 120,
+                      flexShrink: 1,
+                    }}
+                  >
+                    <Text
+                      style={{ color: "white", fontSize: 14, fontFamily: "System" }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {podcast.generos[0]}
+                    </Text>
+                  </View>
+                )}
+                <FontAwesome name="star" size={14} color="#FFD600" style={{ marginRight: 4 }} />
                 <Text
                   style={{
                     color: "white",
                     fontWeight: "bold",
-                    fontSize: 18,
-                    flex: 1,
+                    fontSize: 13,
+                    fontFamily: "System",
                   }}
-                  numberOfLines={1}
                 >
-                  {podcast.title}
+                  5/5
                 </Text>
-                <TouchableOpacity
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <FontAwesome
-                    name="plus-circle"
-                    size={14}
-                    color="#B0B0B0"
-                    style={{ marginRight: 4 }}
-                  />
-                  <Text style={{ color: "#B0B0B0", fontSize: 13 }}>
-                    Eliminar
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 4,
-                }}
-              >
-                <Text
-                  style={{ color: "#D0D0D0", fontSize: 14, flex: 1 }}
-                  numberOfLines={1}
-                >
-                  {podcast.description}
-                </Text>
-                <FontAwesome
-                  name="star"
-                  size={14}
-                  color="#FFD600"
-                  style={{ marginLeft: 8, marginRight: 2 }}
-                />
-                <Text
-                  style={{ color: "white", fontWeight: "bold", fontSize: 13 }}
-                >
-                  4.5/5
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", marginTop: 4 }}>
-                {podcast.genero.map((g, i) => (
-                  <Text
-                    key={i}
-                    style={{
-                      backgroundColor: "#2ECC71",
-                      color: "white",
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 16,
-                      fontSize: 13,
-                      marginRight: 8,
-                      overflow: "hidden",
-                    }}
-                  >
-                    {g}
-                  </Text>
-                ))}
               </View>
             </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
-  );
+  )
 }

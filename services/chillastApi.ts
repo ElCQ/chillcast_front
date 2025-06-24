@@ -311,6 +311,32 @@ export const fetchListas = async (username: string): Promise<Lista[]> => {
 // Eliminar lista (DELETE)
 //
 
+// Obtener lista por id (GET)
+export const fetchLista = async (
+   username: string,
+  listaId: string
+) : Promise<Lista> => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas?username=${encodeURIComponent(username)}&lista=${encodeURIComponent(listaId)}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (response.status === 404) {
+    throw new Error("Lista no encontrada");
+  }
+
+  if (!response.ok) {
+    throw new Error("Error fetching lista", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+
+  return data.listas[0];
+
+};
+
 // Add podcast a list (PUT)
 export const fetchAddPodcastALista = async ({
   username,
