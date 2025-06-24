@@ -1,4 +1,4 @@
-import { Episode, Podcast, User } from "@/interfaces/interfaces";
+import { Episode, Podcast, User, Lista } from "@/interfaces/interfaces";
 
 export const CHILLCAST_CONFIG = {
     BASE_URL: "https://chillcast-backend.onrender.com",
@@ -257,3 +257,90 @@ export const fetchRecommendations = async ({
   
   return data.recomedaciones.generos_fav;
 };
+
+// Crear lista (POST)
+export const fetchCrearLista = async ({
+  username,
+  nombre_lista,
+}: {
+  username: string;
+  nombre_lista: string;
+}) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas?username=${encodeURIComponent(username)}`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      ...CHILLCAST_CONFIG.headers,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ nombre_lista }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error al crear lista: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+// Obtener listas (GET)
+export const fetchListas = async (username: string): Promise<Lista[]> => {
+
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas?username=${encodeURIComponent(username)}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (response.status === 404) {
+    return [];
+  }
+
+  if (!response.ok) {
+    throw new Error("Error fetching listas", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+
+  return data.listas ?? [];
+};
+
+// Eliminar lista (DELETE)
+//
+
+// Add podcast a list (PUT)
+export const fetchAddPodcastALista = async ({
+  username,
+  listaId,
+  podcastId,
+}: {
+  username: string;
+  listaId: string;
+  podcastId: string;
+}) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas/podcast?username=${encodeURIComponent(username)}&lista=${encodeURIComponent(listaId)}&podcast=${encodeURIComponent(podcastId)}`;
+
+  const response = await fetch(endpoint, {
+    method: "PUT",
+    headers: {
+      ...CHILLCAST_CONFIG.headers,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error al añadir podcast a lista: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data;
+
+};
+
+// Eliminar podcast de lista (DELETE)
+//

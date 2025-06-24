@@ -44,3 +44,10 @@ export interface User {
   generos: string[];
   generos_fav: string[];
 }
+
+export interface Lista {
+  _id: string;
+  nombre: string;
+  podcast: string[];
+  user: string;
+}

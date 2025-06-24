@@ -1,91 +1,121 @@
 import FilterTabs from '@/components/filterTabs'
 import { Podcast } from '@/interfaces/interfaces'
-import { fetchFavorites } from '@/services/chillastApi'
+import { fetchCrearLista, fetchFavorites, fetchListas } from '@/services/chillastApi'
 import { FontAwesome } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Dimensions, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 const tabs = ['Favoritos', 'Listas', 'Reseñas', 'Historial']
 
-const listasMock = [
-  {
-    id: '1',
-    title: 'Mis favoritos',
-    image: require('@/assets/images/podcastImage.png'),
-  },
-  {
-    id: '2',
-    title: 'Para viajes',
-    image: require('@/assets/images/podcastImage.png'),
-  },
-]
-
 const MiEspacio = () => {
   const [tab, setTab] = useState('Favoritos')
-  const [favorites, setFavorites] = useState<Podcast[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [favorites, setFavorites] = useState<Podcast[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [newListName, setNewListName] = useState("")
+  const [listas, setListas] = useState<{ id: string; title: string; image: any }[]>([])
   const router = useRouter()
-
-  const fecthData = async () => {
-    const usernameStr = await AsyncStorage.getItem("usuario");
-    const username = usernameStr ? JSON.parse(usernameStr) : null;
-    if (!username?.username) throw new Error("No username found");
-
-    try {
-      setLoading(true);
-      const data = await fetchFavorites(username.username);
-      setFavorites(data);
-      setLoading(false);
-    } catch (error) {
-      setError(error instanceof Error ? error : new Error("Error fetching favorites"));
-    }
-  }
-
-  useEffect(() => {
-    fecthData();
-  }, [])
-
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fecthData();
-    }, [])
-  );
-
 
   const cardMargin = 8
   const cardWidth = (Dimensions.get('window').width - 48 - cardMargin) / 2
 
+  const fecthData = async () => {
+    const usernameStr = await AsyncStorage.getItem("usuario")
+    const username = usernameStr ? JSON.parse(usernameStr) : null
+    if (!username?.username) throw new Error("No username found")
+
+    try {
+      setLoading(true)
+      const data = await fetchFavorites(username.username)
+      setFavorites(data)
+      setLoading(false)
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error("Error fetching favorites"))
+    }
+  }
+
+  const fecthListas = async () => {
+    const usernameStr = await AsyncStorage.getItem("usuario")
+    const username = usernameStr ? JSON.parse(usernameStr) : null
+    if (!username?.username) throw new Error("No username found")
+
+    try {
+      const listasBackend = await fetchListas(username.username)
+      const listasFormateadas = listasBackend.map(lista => ({
+        id: lista._id,
+        title: lista.nombre,
+        image: require('@/assets/images/podcastImage.png'), // Cambiar img
+      }))
+      setListas(listasFormateadas)
+    } catch (error) {
+      console.error("Error fetching listas", error)
+    }
+  }
+
+  const crearListaHandler = async () => {
+    if (!newListName.trim()) {
+      Alert.alert("Error", "El nombre de la lista no puede estar vacío")
+      return
+    }
+
+    const usernameStr = await AsyncStorage.getItem("usuario")
+    const username = usernameStr ? JSON.parse(usernameStr)?.username : null
+    if (!username) {
+      Alert.alert("Error", "No se encontró el usuario")
+      return
+    }
+
+    try {
+      const nuevaLista = await fetchCrearLista({
+        username,
+        nombre_lista: newListName,
+      })
+
+      setListas(prev => [
+        ...prev,
+        {
+          id: nuevaLista._id || Date.now().toString(),
+          title: newListName,
+          image: require("@/assets/images/podcastImage.png"),
+        },
+      ])
+
+      Alert.alert("Éxito", "Lista creada correctamente")
+      setModalVisible(false)
+      setNewListName("")
+    } catch (err) {
+      Alert.alert("Error", "No se pudo crear la lista")
+    }
+  }
+
+  useEffect(() => {
+    fecthData()
+    fecthListas()
+  }, [])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fecthData()
+      fecthListas()
+    }, [])
+  )
+
   return (
     <View style={{ flex: 1, backgroundColor: "#232323" }}>
-      <View
-        className="px-6"
-        style={{ backgroundColor: "#232323", paddingTop: 50 }}
-      >
-        <Text className="text-white text-2xl font-bold mb-6 text-center">
-          Espacio Personal
-        </Text>
+      <View className="px-6" style={{ backgroundColor: "#232323", paddingTop: 50 }}>
+        <Text className="text-white text-2xl font-bold mb-6 text-center">Espacio Personal</Text>
         <FilterTabs tabs={tabs} activeTab={tab} setActiveTab={setTab} />
-        {/* Ordenar y Filtrar */}
         <View
           className="flex-row items-center justify-between mb-6 mt-4 py-2"
           style={{ minHeight: 40 }}
         >
           <View className="flex-row items-center">
-            <FontAwesome
-              name="sliders"
-              size={18}
-              color="#fff"
-              style={{ marginRight: 8 }}
-            />
-            <Text
-              className="text-white font-medium"
-              style={{ fontFamily: "System" }}
-            >
+            <FontAwesome name="sliders" size={18} color="#fff" style={{ marginRight: 8 }} />
+            <Text className="text-white font-medium" style={{ fontFamily: "System" }}>
               Ordenar y Filtrar
             </Text>
           </View>
@@ -93,9 +123,7 @@ const MiEspacio = () => {
             <TouchableOpacity
               className="px-3 py-1 border-2 border-[#A259FF] rounded-full ml-4"
               activeOpacity={0.8}
-              style={{
-                backgroundColor: "transparent",
-              }}
+              onPress={() => setModalVisible(true)}
             >
               <Text
                 className="text-white font-bold"
@@ -113,16 +141,12 @@ const MiEspacio = () => {
       </View>
 
       <ScrollView
-        contentContainerStyle={{
-          paddingTop: 0,
-          paddingBottom: 30,
-          paddingHorizontal: 24,
-        }}
+        contentContainerStyle={{ paddingTop: 0, paddingBottom: 30, paddingHorizontal: 24 }}
         showsVerticalScrollIndicator={false}
       >
         {/* FAVORITOS */}
-        {tab === "Favoritos" &&
-          (loading ? (
+        {tab === "Favoritos" ? (
+          loading ? (
             <ActivityIndicator size="large" color="#fff" />
           ) : error ? (
             <Text className="text-red-400">{error.message}</Text>
@@ -132,9 +156,7 @@ const MiEspacio = () => {
                 <TouchableOpacity
                   key={podcast._id || idx}
                   activeOpacity={0.8}
-                  onPress={() =>
-                    router.push(`/podcast/${podcast._id}`)
-                  }
+                  onPress={() => router.push(`/podcast/${podcast._id}`)}
                   style={{
                     flexDirection: "row",
                     backgroundColor: "#393939",
@@ -175,28 +197,19 @@ const MiEspacio = () => {
                       height: "100%",
                     }}
                   >
-                    <View
+                    <Text
                       style={{
-                        flexDirection: "row",
-                        alignItems: "center",
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        fontFamily: "System",
                         marginBottom: 2,
                       }}
+                      numberOfLines={1}
                     >
-                      <Text
-                        style={{
-                          color: "white",
-                          fontWeight: "bold",
-                          fontSize: 18,
-                          flex: 1,
-                          fontFamily: "System",
-                        }}
-                        numberOfLines={1}
-                      >
-                        {podcast.title}
-                      </Text>
-                    </View>
-                    {/* Género y calificación juntos */}
-                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+                      {podcast.title}
+                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
                       {podcast.genero && podcast.genero.length > 0 && (
                         <View
                           style={{
@@ -210,11 +223,7 @@ const MiEspacio = () => {
                           }}
                         >
                           <Text
-                            style={{
-                              color: "white",
-                              fontSize: 14,
-                              fontFamily: "System",
-                            }}
+                            style={{ color: "white", fontSize: 14, fontFamily: "System" }}
                             numberOfLines={1}
                             ellipsizeMode="tail"
                           >
@@ -238,7 +247,8 @@ const MiEspacio = () => {
                 </TouchableOpacity>
               ))}
             </View>
-          ))}
+          )
+        ) : null}
 
         {/* LISTAS */}
         {tab === "Listas" && (
@@ -249,7 +259,7 @@ const MiEspacio = () => {
               justifyContent: "flex-start",
             }}
           >
-            {listasMock.map((lista, idx) => (
+            {listas.map((lista, idx) => (
               <TouchableOpacity
                 key={lista.id}
                 activeOpacity={0.8}
@@ -328,10 +338,7 @@ const MiEspacio = () => {
 
         {/* RESEÑAS */}
         {tab === "Reseñas" && (
-          <Text
-            className="text-white text-center mt-10"
-            style={{ fontFamily: "System" }}
-          >
+          <Text className="text-white text-center mt-10" style={{ fontFamily: "System" }}>
             Aca van tus reseñas
           </Text>
         )}
@@ -343,23 +350,15 @@ const MiEspacio = () => {
               <TouchableOpacity
                 key={podcast._id || idx}
                 activeOpacity={0.8}
-                onPress={() =>
-                  router.push(`/podcast/${podcast._id}`)
-                }
+                onPress={() => router.push(`/podcast/${podcast._id}`)}
                 style={{
                   flexDirection: "row",
                   backgroundColor: "#393939",
                   borderRadius: 18,
                   alignItems: "center",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  elevation: 2,
                   padding: 0,
                   height: 100,
                   overflow: "hidden",
-                  marginBottom: 0,
                 }}
               >
                 <Image
@@ -412,11 +411,7 @@ const MiEspacio = () => {
                         }}
                       >
                         <Text
-                          style={{
-                            color: "white",
-                            fontSize: 14,
-                            fontFamily: "System",
-                          }}
+                          style={{ color: "white", fontSize: 14, fontFamily: "System" }}
                           numberOfLines={1}
                           ellipsizeMode="tail"
                         >
@@ -442,6 +437,53 @@ const MiEspacio = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* MODAL PARA CREAR LISTA */}
+      <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              width: '100%',
+              backgroundColor: '#2c2c2c',
+              padding: 20,
+              borderRadius: 12,
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 18, marginBottom: 10 }}>Nombre de la lista</Text>
+            <TextInput
+              placeholder="Ej: Para viajes"
+              placeholderTextColor="#999"
+              value={newListName}
+              onChangeText={setNewListName}
+              style={{
+                borderWidth: 1,
+                borderColor: '#555',
+                borderRadius: 8,
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                color: 'white',
+                marginBottom: 16,
+              }}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={{ color: '#aaa', marginRight: 20 }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={crearListaHandler}>
+                <Text style={{ color: '#A259FF', fontWeight: 'bold' }}>Crear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }

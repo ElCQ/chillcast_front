@@ -3,14 +3,14 @@ import BackButton from "@/components/buttons/backButton";
 import FilterTabs from "@/components/filterTabs";
 import { StarRatingTextLg } from "@/components/starRatingText";
 import { Icons } from "@/constants/icons";
-import { fetchAddFavorite, fetchUniquePodcast } from "@/services/chillastApi";
+import { fetchAddFavorite, fetchUniquePodcast, fetchListas, fetchAddPodcastALista } from "@/services/chillastApi";
 import useFetch from "@/services/useFetch";
 import { hexToRgba } from "@/utils/colorUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { ActivityIndicator, Image, ImageBackground, Pressable, Text, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ActivityIndicator, Image, ImageBackground, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 import Episodios from "./episodios";
 import Informacion from "./informacion";
@@ -19,40 +19,120 @@ import Reseñas from "./reseñas";
 const SpotifyLogo = require("../../assets/images/spotifyLogo.png");
 
 const Podcasts = () => {
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [listasUsuario, setListasUsuario] = useState([]);
+  const [username, setUsername] = useState<string | null>(null);
+
   const { id } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState("Información");
   const tabs = ["Información", "Episodios", "Reseñas"];
 
   const { data, loading, error } = useFetch(() => fetchUniquePodcast({ id }));
 
-  const handleAddToFavorites = async () => {
-    console.log("Click en añadir a favoritos");
-
-    try {
+  useEffect(() => {
+    const loadUserData = async () => {
       const usuarioStr = await AsyncStorage.getItem("usuario");
-      if (!usuarioStr) throw new Error("No se encontró usuario autenticado");
+      if (!usuarioStr) return;
 
       const usuario = JSON.parse(usuarioStr);
+      if (!usuario?.username) return;
 
-      if (!usuario.username) throw new Error("Usuario inválido");
+      setUsername(usuario.username);
+      try {
+        const listas = await fetchListas(usuario.username);
+        setListasUsuario(listas);
+      } catch (err) {
+        console.error("Error cargando listas del usuario", err);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
+  useEffect(() => {
+    const checkIfFavorite = async () => {
+      try {
+        const favoritePodcasts = await AsyncStorage.getItem("favorites");
+        if (favoritePodcasts) {
+          const parsedFavorites = JSON.parse(favoritePodcasts);
+          const isInFavorites = parsedFavorites.some((podcast) => podcast.id === data.id);
+          setIsFavorite(isInFavorites);
+        }
+      } catch (err) {
+        console.error("Error checking favorites:", err);
+      }
+    };
+
+    if (data) {
+      checkIfFavorite();
+    }
+  }, [data]);
+
+  const handleAddToFavorites = async () => {
+    try {
+      if (!username) throw new Error("No se encontró usuario autenticado");
 
       const podcastId = Array.isArray(id) ? id[0] : id;
+      const favoritePodcastsStr = await AsyncStorage.getItem("favorites");
+      let favoritePodcasts = favoritePodcastsStr ? JSON.parse(favoritePodcastsStr) : [];
+
+      if (isFavorite) {
+        favoritePodcasts = favoritePodcasts.filter((podcast) => podcast.id !== data.id);
+        setIsFavorite(false);
+        Toast.show({
+          type: "success",
+          text1: "¡Éxito!",
+          text2: "Podcast eliminado de favoritos",
+        });
+      } else {
+        favoritePodcasts.push({ id: data.id, title: data.title });
+        setIsFavorite(true);
+        Toast.show({
+          type: "success",
+          text1: "¡Éxito!",
+          text2: "Podcast añadido a favoritos",
+        });
+      }
+
+      await AsyncStorage.setItem("favorites", JSON.stringify(favoritePodcasts));
 
       await fetchAddFavorite({
-        username: usuario.username,
+        username,
         podcastId,
-      });
-
-      Toast.show({
-        type: "success",
-        text1: "¡Éxito!",
-        text2: "Podcast añadido a favoritos",
       });
     } catch (err) {
       Toast.show({
         type: "error",
         text1: "Error",
-        text2: err instanceof Error ? err.message : "Error al agregar a favoritos",
+        text2: err instanceof Error ? err.message : "Error al actualizar favoritos",
+      });
+    }
+  };
+
+  const handleAñadirALista = async (listaId: string) => {
+    if (!username) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "No se encontró usuario para añadir a lista",
+      });
+      return;
+    }
+    try {
+      const podcastId = Array.isArray(id) ? id[0] : id;
+      await fetchAddPodcastALista({ username, listaId, podcastId });
+      Toast.show({
+        type: "success",
+        text1: "¡Éxito!",
+        text2: "Podcast añadido a la lista",
+      });
+      setModalVisible(false);
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: err instanceof Error ? err.message : "No se pudo añadir el podcast a la lista",
       });
     }
   };
@@ -116,14 +196,14 @@ const Podcasts = () => {
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center justify-start gap-5">
               <AddButton
-                label="Añadir a favoritos"
+                label={isFavorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
                 icon={Icons.CirclePlusIcon}
                 onPress={handleAddToFavorites}
               />
               <AddButton
                 label="Añadir a lista"
                 icon={Icons.FolderPlusIcon}
-                onPress={() => console.log("Añadido a lista")}
+                onPress={() => setModalVisible(true)}
               />
             </View>
             {data.source === "Spotify" && (
@@ -142,6 +222,32 @@ const Podcasts = () => {
         {activeTab === "Episodios" && <Episodios dataPodcast={data} />}
         {activeTab === "Reseñas" && <Reseñas data={data} />}
       </View>
+
+      {/* Seleccionar lista */}
+      <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
+        <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', justifyContent:'center', padding:20 }}>
+          <View style={{ backgroundColor:'#2c2c2c', borderRadius: 10, padding: 20, maxHeight: '80%' }}>
+            <Text style={{ color:'white', fontSize: 18, marginBottom: 10 }}>Selecciona una lista</Text>
+            <ScrollView>
+              {listasUsuario.length === 0 && (
+                <Text style={{ color: 'white', fontSize: 16 }}>No tienes listas creadas.</Text>
+              )}
+              {listasUsuario.map((lista) => (
+                <TouchableOpacity
+                  key={lista._id}
+                  onPress={() => handleAñadirALista(lista._id)}
+                  style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#444' }}
+                >
+                  <Text style={{ color: 'white', fontSize: 16 }}>{lista.nombre}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginTop: 15, alignItems: 'center' }}>
+              <Text style={{ color: '#A259FF', fontWeight: 'bold' }}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
