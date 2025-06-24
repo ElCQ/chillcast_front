@@ -3,7 +3,7 @@ import BackButton from "@/components/buttons/backButton";
 import FilterTabs from "@/components/filterTabs";
 import { StarRatingTextLg } from "@/components/starRatingText";
 import { Icons } from "@/constants/icons";
-import { fetchAddFavorite, fetchUniquePodcast, fetchListas, fetchAddPodcastALista } from "@/services/chillastApi";
+import { fetchAddFavorite, fetchUniquePodcast, fetchListas, fetchAddPodcastALista,fetchAddPodcastAHistorial } from "@/services/chillastApi";
 import useFetch from "@/services/useFetch";
 import { hexToRgba } from "@/utils/colorUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -137,6 +137,36 @@ const Podcasts = () => {
     }
   };
 
+  const handleMarkAsSeen = async () => {
+    try {
+      const usuarioStr = await AsyncStorage.getItem("usuario");
+      if (!usuarioStr) throw new Error("No se encontró el usuario");
+
+      const usuario = JSON.parse(usuarioStr);
+      if (!usuario.username || !usuario.email) throw new Error("Usuario inválido");
+
+      const podcastId = Array.isArray(id) ? id[0] : id;
+
+      await fetchAddPodcastAHistorial({
+        username: usuario.username,
+        email: usuario.email,
+        podcastId,
+      });
+
+      Toast.show({
+        type: "success",
+        text1: "Podcast marcado como visto",
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error al agregar al historial",
+        text2: error instanceof Error ? error.message : "Error desconocido",
+      });
+    }
+  };
+
+
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-[#282828]">
@@ -204,6 +234,11 @@ const Podcasts = () => {
                 label="Añadir a lista"
                 icon={Icons.FolderPlusIcon}
                 onPress={() => setModalVisible(true)}
+              />
+              <AddButton
+                label="Visto"
+                icon={Icons.EyeIcon}
+                onPress={handleMarkAsSeen}
               />
             </View>
             {data.source === "Spotify" && (

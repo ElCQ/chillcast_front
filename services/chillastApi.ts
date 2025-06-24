@@ -146,7 +146,6 @@ export const fetchFavorites = async (username: string): Promise<Podcast[]> => {
   });
 
   if (response.status === 404) {
-    // Si no hay favoritos, devolvemos un array vacío
     return [];
   }
 
@@ -344,3 +343,60 @@ export const fetchAddPodcastALista = async ({
 
 // Eliminar podcast de lista (DELETE)
 //
+
+// Agregar podcast a historial (POST)
+export const fetchAddPodcastAHistorial = async({
+  username,
+  email,
+  podcastId,
+}: {
+  username: string;
+  email: string;
+  podcastId: string;
+}) => {
+    const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/history`;
+
+    const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      ...CHILLCAST_CONFIG.headers,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      username, 
+      email, 
+      id_podcast: podcastId 
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error agregando al historial: ${errorText}`);
+  }
+
+  return response.json();
+
+};
+
+// Obtener historial (GET)
+export const fetchHistorial = async (username: string): Promise<Lista[]> => {
+
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas?username=${encodeURIComponent(username)}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (response.status === 404) {
+    return [];
+  }
+
+  if (!response.ok) {
+    throw new Error("Error fetching listas", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+
+  return data.listas ?? [];
+};
