@@ -77,6 +77,7 @@ export default function GenerosUsuariosScreen() {
             return;
         }
 
+        setLoading(true);
         try {
             const usuarioStr = await AsyncStorage.getItem('usuario');
             if (!usuarioStr) throw new Error('Usuario no encontrado');
@@ -105,6 +106,8 @@ export default function GenerosUsuariosScreen() {
             router.push('/(tabs)/profile');
         } catch (err: any) {
             Alert.alert('Error', err.message);
+        }finally {
+            setLoading(false);
         }
     };
 
