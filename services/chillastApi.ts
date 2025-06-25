@@ -309,7 +309,28 @@ export const fetchListas = async (username: string): Promise<Lista[]> => {
 };
 
 // Eliminar lista (DELETE)
-//
+export const fetchDeleteLista = async ({
+  username,
+  listaId,
+}: {
+  username: string;
+  listaId: string;
+}) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas?username=${encodeURIComponent(username)}&lista=${encodeURIComponent(listaId)}`;
+
+  const response = await fetch(endpoint, {
+    method: "DELETE",
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al eliminar la lista");
+  }
+
+  return await response.json();
+};
 
 // Obtener lista por id (GET)
 export const fetchLista = async (
@@ -368,7 +389,32 @@ export const fetchAddPodcastALista = async ({
 };
 
 // Eliminar podcast de lista (DELETE)
-//
+export const fetchDeletePodcastALista = async ({
+  username,
+  listaId,
+  podcastId,
+} : {
+  username: string;
+  listaId: string;
+  podcastId: string;
+}) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas/podcast?username=${encodeURIComponent(username)}&lista=${encodeURIComponent(listaId)}&podcast=${encodeURIComponent(podcastId)}`;
+
+  const response = await fetch(endpoint, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al eliminar podcast de la lista");
+  }
+
+  return await response.json();
+
+};
 
 // Agregar podcast a historial (POST)
 export const fetchAddPodcastAHistorial = async({
