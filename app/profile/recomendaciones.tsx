@@ -37,7 +37,7 @@ export default function GenerosUsuariosScreen() {
             const { username } = JSON.parse(usuarioStr);
 
             const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/user-me?username=${encodeURIComponent(username)}`
+                `http://127.0.0.1:5000/api/v1/auth/user-me?username=${encodeURIComponent(username)}`
             );
 
             if (!response.ok) throw new Error('Fallo la llamada a la API');
@@ -85,7 +85,7 @@ export default function GenerosUsuariosScreen() {
             const { username } = JSON.parse(usuarioStr);
 
             const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(username)}`,
+                `http://127.0.0.1:5000/api/v1/auth/edit-user?username=${encodeURIComponent(username)}`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },

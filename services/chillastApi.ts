@@ -1,7 +1,7 @@
-import { Episode, Podcast, User, Lista } from "@/interfaces/interfaces";
+import { Episode, Lista, Podcast, User } from "@/interfaces/interfaces";
 
 export const CHILLCAST_CONFIG = {
-    BASE_URL: "https://chillcast-backend.onrender.com",
+    BASE_URL: "http://127.0.0.1:5000",
     //API_KEY: process.env.NEXT_PUBLIC_CHILLCAST_API_KEY,
     headers: {
         accept: "application/json",

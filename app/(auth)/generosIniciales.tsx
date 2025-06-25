@@ -1,3 +1,4 @@
+import Loader from '@/components/loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -8,7 +9,6 @@ import {
     Text,
     TouchableOpacity
 } from 'react-native';
-import Loader from '@/components/loader';
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
@@ -54,7 +54,7 @@ export default function WelcomeScreen() {
             const savedUsername = usuario?.username;
 
             const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(savedUsername)}`,
+                `http://127.0.0.1:5000/api/v1/auth/edit-user?username=${encodeURIComponent(savedUsername)}`,
                 {
                     method: 'PUT',
                     headers: {

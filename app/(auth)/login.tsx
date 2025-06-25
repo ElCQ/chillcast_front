@@ -1,3 +1,4 @@
+import Loader from '@/components/loader';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -15,7 +16,6 @@ import {
     View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import Loader from '@/components/loader';
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -64,7 +64,7 @@ export default function LoginScreen() {
 
         setLoading(true);
         try {
-            const response = await fetch('https://chillcast-backend.onrender.com/api/v1/auth/login', {
+            const response = await fetch('http://127.0.0.1:5000/api/v1/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
