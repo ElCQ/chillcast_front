@@ -41,10 +41,14 @@ const FeedCard = ({
 
 
 
-  const player =
-    feed.episode && feed.episode.audio_url && feed.episode.audio_url.match(/^(https?:\/\/.*\.(?:mp3|wav|ogg|m4a|aac))$/i)
-      ? useAudioPlayer(feed.episode.audio_url)
-      : useAudioPlayer();
+  const audioUrl =
+    feed.episode &&
+    feed.episode.audio_url &&
+    feed.episode.audio_url.match(/^(https?:\/\/.*\.(?:mp3|wav|ogg|m4a|aac))$/i)
+      ? feed.episode.audio_url
+      : undefined;
+
+  const player = useAudioPlayer(audioUrl);
 
 
   const handlePlayPause = () => {
