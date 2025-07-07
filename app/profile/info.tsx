@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 export default function InfoUsuario() {
   const [name, setName] = useState("");
@@ -30,9 +31,17 @@ export default function InfoUsuario() {
     try {
       await AsyncStorage.setItem("userName", name);
       await AsyncStorage.setItem("userEmail", email);
-      Alert.alert("✅ Guardado", "Tus cambios se guardaron correctamente.");
+      Toast.show({
+        type: "success",
+        text1: "¡Éxito!",
+        text2: "Tus cambios se guardaron correctamente",
+      });
     } catch {
-      Alert.alert("❌ Error", "No pudimos guardar tus cambios.");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "No pudimos guardar tus cambios.",
+      });
     }
   };
 

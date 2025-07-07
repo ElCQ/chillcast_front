@@ -9,6 +9,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 import Loader from '@/components/loader';
+import Toast from "react-native-toast-message";
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
@@ -71,7 +72,11 @@ export default function WelcomeScreen() {
 
             router.push('/(tabs)/home');
         } catch (err: any) {
-            Alert.alert('Error', err.message);
+            Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: err.message,
+            });
         }
         finally {
             setLoading(false);

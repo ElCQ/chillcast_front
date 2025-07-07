@@ -26,6 +26,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
 import { Swipeable } from 'react-native-gesture-handler'
+import Toast from "react-native-toast-message";
 
 const tabs = ['Favoritos', 'Listas', 'Reseñas', 'Historial']
 
@@ -78,14 +79,22 @@ const MiEspacio = () => {
 
   const crearListaHandler = async () => {
     if (!newListName.trim()) {
-      Alert.alert('Error', 'El nombre de la lista no puede estar vacío')
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "El nombre de la lista no puede estar vacío",
+      });
       return
     }
 
     const usernameStr = await AsyncStorage.getItem('usuario')
     const username = usernameStr ? JSON.parse(usernameStr)?.username : null
     if (!username) {
-      Alert.alert('Error', 'No se encontró el usuario')
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "No se encontró el usuario",
+      });
       return
     }
 
@@ -104,11 +113,20 @@ const MiEspacio = () => {
         },
       ])
 
-      Alert.alert('Éxito', 'Lista creada correctamente')
+
+      Toast.show({
+        type: "success",
+        text1: "¡Éxito!",
+        text2: "Lista creada correctamente",
+      });
       setModalVisible(false)
       setNewListName('')
     } catch (err) {
-      Alert.alert('Error', 'No se pudo crear la lista')
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "No se pudo crear la lista",
+      });
     }
   }
 
@@ -116,7 +134,11 @@ const MiEspacio = () => {
     const usernameStr = await AsyncStorage.getItem('usuario')
     const username = usernameStr ? JSON.parse(usernameStr)?.username : null
     if (!username) {
-      Alert.alert('Error', 'No se encontró el usuario')
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "No se encontró el usuario",
+      });
       return
     }
 
@@ -133,9 +155,17 @@ const MiEspacio = () => {
               await fetchDeleteLista({ username, listaId })
               setListas((prev) => prev.filter((l) => l.id !== listaId))
               setSelectedListId(null)
-              Alert.alert('Lista eliminada')
+              Toast.show({
+                type: "success",
+                text1: "Exito",
+                text2: "Lista eliminada correctamente",
+              });
             } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar la lista')
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "No se pudo eliminar la lista",
+              });
             }
           },
         },
@@ -148,7 +178,11 @@ const MiEspacio = () => {
     const usernameStr = await AsyncStorage.getItem('usuario')
     const username = usernameStr ? JSON.parse(usernameStr)?.username : null
     if (!username) {
-      Alert.alert('Error', 'No se encontró el usuario')
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "No se encontró el usuario",
+      });
       return
     }
 
@@ -164,9 +198,17 @@ const MiEspacio = () => {
             try {
               await fetchDeleteFavorite({ username, podcastId })
               setFavorites((prev) => prev.filter((p) => p._id !== podcastId))
-              Alert.alert('Eliminado de favoritos')
+              Toast.show({
+                type: "success",
+                text1: "¡Éxito!",
+                text2: "Eliminado de favoritos",
+              });
             } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar el favorito')
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "No se pudo eliminar el favorito",
+              });
             }
           },
         },
