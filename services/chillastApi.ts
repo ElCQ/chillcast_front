@@ -1,4 +1,5 @@
 import { Episode, Podcast, User, Lista } from "@/interfaces/interfaces";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const CHILLCAST_CONFIG = {
     BASE_URL: "https://chillcast-backend.onrender.com",
@@ -8,6 +9,8 @@ export const CHILLCAST_CONFIG = {
         //Authorization: `Bearer ${process.env.NEXT_PUBLIC_CHILLCAST_API_KEY}`,
     }
 }
+
+//------------------------------------------------------------------------
 
 export const fetchPodcasts = async ({
   query,
@@ -29,6 +32,8 @@ export const fetchPodcasts = async ({
   const data = await response.json();
   return data.podcasts;
 };
+
+//------------------------------------------------------------------------
 
 export const fetchPodcastsFilters = async (filters: {
   title?: string;
@@ -66,6 +71,8 @@ export const fetchPodcastsFilters = async (filters: {
   return data.podcasts;
 };
 
+//------------------------------------------------------------------------
+
 export const fetchUniquePodcast = async ({
   id,
 }: {
@@ -87,6 +94,7 @@ export const fetchUniquePodcast = async ({
   return data.podcasts;
 };
 
+//------------------------------------------------------------------------
 
 export const fetchEpisodesFromPodcast = async ({
   id,
@@ -110,6 +118,8 @@ export const fetchEpisodesFromPodcast = async ({
 
   return data.episodes;
 };
+
+//------------------------------------------------------------------------
 
 export const fetchEpisodeById = async ({
   id,
@@ -135,7 +145,9 @@ export const fetchEpisodeById = async ({
   return data.episodes[0];
 };
 
+//------------------------------------------------------------------------
 // Obtener favoritos (GET)
+
 export const fetchFavorites = async (username: string): Promise<Podcast[]> => {
 
   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/favorites?username=${encodeURIComponent(username)}`;
@@ -158,7 +170,9 @@ export const fetchFavorites = async (username: string): Promise<Podcast[]> => {
   return data.favorites;
 };
 
+//------------------------------------------------------------------------
 // Agregar a favoritos (POST)
+
 export const fetchAddFavorite = async ({
   username,
   podcastId,
@@ -186,7 +200,9 @@ export const fetchAddFavorite = async ({
   return data;
 };
 
+//------------------------------------------------------------------------
 // Eliminar de favoritos (DELETE)
+
 export const fetchDeleteFavorite = async ({
   username,
   podcastId,
@@ -212,6 +228,7 @@ export const fetchDeleteFavorite = async ({
   return await response.json();
 };
 
+//------------------------------------------------------------------------
 
 export const fetchUserData = async ({
   username,
@@ -232,6 +249,8 @@ export const fetchUserData = async ({
   const data = await response.json();
   return data.user[0];
 };
+
+//------------------------------------------------------------------------
 
 export const fetchRecommendations = async ({
   username,
@@ -257,7 +276,9 @@ export const fetchRecommendations = async ({
   return data.recomedaciones.generos_fav;
 };
 
+//------------------------------------------------------------------------
 // Crear lista (POST)
+
 export const fetchCrearLista = async ({
   username,
   nombre_lista,
@@ -285,7 +306,9 @@ export const fetchCrearLista = async ({
   return data;
 };
 
+//------------------------------------------------------------------------
 // Obtener listas (GET)
+
 export const fetchListas = async (username: string): Promise<Lista[]> => {
 
   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas?username=${encodeURIComponent(username)}`;
@@ -308,7 +331,9 @@ export const fetchListas = async (username: string): Promise<Lista[]> => {
   return data.listas ?? [];
 };
 
+//------------------------------------------------------------------------
 // Eliminar lista (DELETE)
+
 export const fetchDeleteLista = async ({
   username,
   listaId,
@@ -332,7 +357,9 @@ export const fetchDeleteLista = async ({
   return await response.json();
 };
 
+//------------------------------------------------------------------------
 // Obtener lista por id (GET)
+
 export const fetchLista = async (
    username: string,
   listaId: string
@@ -358,7 +385,9 @@ export const fetchLista = async (
 
 };
 
+//------------------------------------------------------------------------
 // Add podcast a list (PUT)
+
 export const fetchAddPodcastALista = async ({
   username,
   listaId,
@@ -388,7 +417,9 @@ export const fetchAddPodcastALista = async ({
 
 };
 
+//------------------------------------------------------------------------
 // Eliminar podcast de lista (DELETE)
+
 export const fetchDeletePodcastALista = async ({
   username,
   listaId,
@@ -416,7 +447,9 @@ export const fetchDeletePodcastALista = async ({
 
 };
 
+//------------------------------------------------------------------------
 // Agregar podcast a historial (POST)
+
 export const fetchAddPodcastAHistorial = async({
   username,
   email,
@@ -450,7 +483,9 @@ export const fetchAddPodcastAHistorial = async({
 
 };
 
+//------------------------------------------------------------------------
 // Obtener historial (GET)
+
 export const fetchHistorial = async (username: string): Promise<Lista[]> => {
 
   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/listas?username=${encodeURIComponent(username)}`;
@@ -471,4 +506,137 @@ export const fetchHistorial = async (username: string): Promise<Lista[]> => {
   const data = await response.json();
 
   return data.listas ?? [];
+};
+
+//------------------------------------------------------------------------
+
+export const updateUserGenresAPI = async (username: string, generos: string[]) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/edit-user?username=${encodeURIComponent(username)}`;
+  const response = await fetch(endpoint,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ generos }),
+      }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Error al actualizar géneros");
+  }
+
+  return response.json();
+};
+
+//------------------------------------------------------------------------
+
+export const loginUser = async (username: string, password: string, rememberMe: boolean) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/login`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error('Error de credenciales');
+  }
+
+  const usuario = data.user?.[0];
+  if (!usuario) {
+    throw new Error('Usuario inválido');
+  }
+
+  await AsyncStorage.setItem('logged', 'true');
+  await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
+
+  if (rememberMe) {
+    await AsyncStorage.setItem('rememberMe', 'true');
+  } else {
+    await AsyncStorage.removeItem('rememberMe');
+  }
+};
+
+//------------------------------------------------------------------------
+
+export const registerUser = async ({
+                                     username,
+                                     email,
+                                     password,
+                                     nombre,
+                                   }: {
+  username: string;
+  email: string;
+  password: string;
+  nombre: string;
+}) => {
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/register-user`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, email, password, nombre }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const mensajeError = data?.error || 'Ocurrió un error inesperado';
+    throw new Error(mensajeError);
+  }
+
+  const user = data.user?.[0];
+  if (!user) throw new Error('Usuario inválido');
+
+  await AsyncStorage.setItem('usuario', JSON.stringify(user));
+  await AsyncStorage.setItem('rememberMe', 'true');
+};
+
+//------------------------------------------------------------------------
+
+export const getUserGenres = async (): Promise<string[]> => {
+  const usuarioStr = await AsyncStorage.getItem('usuario');
+  if (!usuarioStr) throw new Error('Usuario no encontrado');
+
+  const { username } = JSON.parse(usuarioStr);
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/user-me?username=${encodeURIComponent(username)}`;
+
+  const response = await fetch(endpoint);
+  if (!response.ok) throw new Error('Fallo la llamada a la API');
+
+  const data = await response.json();
+  const user = data?.user?.[0];
+  if (!user) throw new Error('Usuario inválido');
+
+  return user?.generos_fav ?? [];
+};
+
+//------------------------------------------------------------------------
+
+export const updateUserGenres = async (generos: string[]) => {
+  const usuarioStr = await AsyncStorage.getItem('usuario');
+  if (!usuarioStr) throw new Error('Usuario no encontrado');
+
+  const { username } = JSON.parse(usuarioStr);
+
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/auth/edit-user?username=${encodeURIComponent(username)}`;
+  const response = await fetch(endpoint, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ generos }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Error al guardar géneros');
+  }
 };

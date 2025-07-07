@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Loader from '@/components/loader';
 import Toast from "react-native-toast-message";
+import { updateUserGenresAPI } from "@/services/chillastApi";
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',
@@ -52,36 +53,24 @@ export default function WelcomeScreen() {
             const usuarioStr = await AsyncStorage.getItem("usuario");
             const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
             if (!usuario?.username) throw new Error("No username found");
-            const savedUsername = usuario?.username;
 
-            const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(savedUsername)}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ generos: omit ? [] : selectedGenres }),
-                }
-            );
+            const generos = omit ? [] : selectedGenres;
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al actualizar géneros');
-            }
+            await updateUserGenresAPI(usuario.username, generos);
 
-            router.push('/(tabs)/home');
+            router.push("/(tabs)/home");
         } catch (err: any) {
             Toast.show({
                 type: "error",
                 text1: "Error",
                 text2: err.message,
             });
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
     };
+
+
 
     return (
         <>

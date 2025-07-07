@@ -13,6 +13,7 @@ import { Href, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
+import Loader from '@/components/loader';
 
 type Feed = {
   podcast: Podcast;
@@ -34,26 +35,18 @@ const FeedCard = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [playable, setPlayable] = useState(false);
   const [openDescription, setOpenDescription] = useState(false);
   const [favoritoActual, setFavoritoActual] = useState(favorite);
+  const [loading, setLoading] = useState(false);
 
-
-
-
-  const audioUrl =
-    feed.episode &&
-    feed.episode.audio_url &&
-    feed.episode.audio_url.match(/^(https?:\/\/.*\.(?:mp3|wav|ogg|m4a|aac))$/i)
-      ? feed.episode.audio_url
-      : undefined;
-
-  const player = useAudioPlayer(audioUrl);
-
+  const player =
+    feed.episode && feed.episode.audio_url
+      ? useAudioPlayer(feed.episode.audio_url)
+      : null;
 
   const handlePlayPause = () => {
-    if (!player.isLoaded) return;
-    if (activePodcast != feed.podcast._id) return;
+    if (!player) return;
+    if (activePodcast != feed.podcast.id) return;
 
     if (isPlaying) {
       player.pause();
@@ -65,15 +58,14 @@ const FeedCard = ({
   };
 
   const handleFowardBackward = (cantidad: number) => {
-    if (!player.isLoaded) return;
+    if (!player) return;
     player.seekTo(player.currentTime + cantidad);
   };
 
   const handleRedirect = (url: Href) => {
-    if (player.isLoaded) {
-      player.pause();
-      setIsPlaying(false);
-    }
+    if (!player) return;
+    player.pause();
+    setIsPlaying(false);
     router.push(url);
   };
 
@@ -87,6 +79,7 @@ const FeedCard = ({
       return;
     }
 
+    setLoading(true);
     try {
       const usuarioStr = await AsyncStorage.getItem("usuario");
       const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
@@ -129,14 +122,16 @@ const FeedCard = ({
         text2:
           err instanceof Error ? err.message : "Error al agregar a favoritos",
       });
+    }finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     let isMounted = true;
-    if (!player.isLoaded) return;
+    if (!player) return;
 
-    if (activePodcast === feed.podcast._id && !isPlaying) {
+    if (activePodcast === feed.podcast.id && !isPlaying) {
       player.play();
       setIsPlaying(true);
     }
@@ -152,7 +147,7 @@ const FeedCard = ({
           player.seekTo(0);
         }
 
-        if (isPlaying && activePodcast !== feed.podcast._id) {
+        if (isPlaying && activePodcast !== feed.podcast.id) {
           player.pause();
           setIsPlaying(false);
         }
@@ -167,7 +162,7 @@ const FeedCard = ({
     return () => {
       isMounted = false;
       listener.remove && listener.remove();
-      if (player.isLoaded) {
+      if (player) {
         try {
           player.pause();
         } catch (e) {
@@ -179,6 +174,7 @@ const FeedCard = ({
   }, [activePodcast, player]);
 
   return (
+      <>
     <View
       className="flex-1 "
       style={{ position: "relative", height: cardHeight }}
@@ -220,7 +216,7 @@ const FeedCard = ({
                   </Text>
               </TouchableOpacity>
 
-              {player.isLoaded && feed.episode != null ? (
+              {player && feed.episode != null ? (
                 <>
                   <View className="flex flex-row gap-2 my-2">
                     <AntDesign name="sound" size={18} color="#a3a3a3" />
@@ -290,7 +286,7 @@ const FeedCard = ({
                 onPress={() =>
                   handleRedirect(
                     `/podcast/${
-                      feed.podcast._id
+                      feed.podcast?.id ? feed.podcast.id : feed.podcast?._id
                     }`
                   )
                 }
@@ -307,7 +303,7 @@ const FeedCard = ({
         </LinearGradient>
       </ImageBackground>
 
-      {player.isLoaded && feed.episode != null ? (
+      {player && feed.episode != null ? (
         <View className="absolute justify-center items-center top-1/2 left-1/3">
           <View className="flex flex-row gap-4 justify-center items-center">
             <TouchableOpacity
@@ -350,6 +346,8 @@ const FeedCard = ({
         </>
       )}
     </View>
+        <Loader visible={loading} />
+      </>
   );
 };
 

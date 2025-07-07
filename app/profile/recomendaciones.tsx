@@ -31,23 +31,8 @@ export default function GenerosUsuariosScreen() {
     const fetchUserGenres = async () => {
         setLoading(true);
         try {
-            const usuarioStr = await AsyncStorage.getItem('usuario');
-            if (!usuarioStr) throw new Error('Usuario no encontrado');
-
-            const { username } = JSON.parse(usuarioStr);
-
-            const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/user-me?username=${encodeURIComponent(username)}`
-            );
-
-            if (!response.ok) throw new Error('Fallo la llamada a la API');
-
-            const data = await response.json();
-            const user = data?.user?.[0];
-
-            const generos = user?.generos_fav ?? []; // Si no hay, pone array vacío
+            const generos = await getUserGenres();
             setSelectedGenres(generos);
-
         } catch (err: any) {
             Toast.show({
                 type: 'error',
@@ -79,24 +64,7 @@ export default function GenerosUsuariosScreen() {
 
         setLoading(true);
         try {
-            const usuarioStr = await AsyncStorage.getItem('usuario');
-            if (!usuarioStr) throw new Error('Usuario no encontrado');
-
-            const { username } = JSON.parse(usuarioStr);
-
-            const response = await fetch(
-                `https://chillcast-backend.onrender.com/api/v1/auth/edit-user?username=${encodeURIComponent(username)}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ generos: selectedGenres }),
-                }
-            );
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al guardar géneros');
-            }
+            await updateUserGenres(selectedGenres);
 
             Toast.show({
                 type: 'success',
@@ -106,11 +74,11 @@ export default function GenerosUsuariosScreen() {
             router.push('/(tabs)/profile');
         } catch (err: any) {
             Toast.show({
-                type: "error",
-                text1: "Error",
+                type: 'error',
+                text1: 'Error',
                 text2: err.message,
             });
-        }finally {
+        } finally {
             setLoading(false);
         }
     };

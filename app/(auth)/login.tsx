@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import Loader from '@/components/loader';
+import { loginUser } from "@/services/chillastApi";
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -40,17 +41,13 @@ export default function LoginScreen() {
             if (savedUsername) setUsername(savedUsername);
             if (remember === 'true') setRememberMe(true);
         };
-
-
-
-
         loadUser();
-
         return () => {
             showSub.remove();
             hideSub.remove();
         };
     }, []);
+
 
     const handleLogin = async () => {
         const newErrors = {
@@ -64,54 +61,20 @@ export default function LoginScreen() {
 
         setLoading(true);
         try {
-            const response = await fetch('https://chillcast-backend.onrender.com/api/v1/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: username,
-                    password: password,
-                }),
-            });
-
-            const data = await response.json();
-
-
-
-            if (!response.ok) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Login inválido',
-                    text2: 'Usuario o contraseña incorrectos',
-                });
-                return;
-            }
-
-            const usuario = data.user[0];
-
-            await AsyncStorage.setItem('logged', 'true');
-            await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
-            if (rememberMe) {
-                await AsyncStorage.setItem('rememberMe', 'true');
-            } else {
-                await AsyncStorage.removeItem("rememberMe");
-            }
-
+            await loginUser(username, password, rememberMe);
             router.push('/(tabs)/home');
-
-
         } catch (error) {
             Toast.show({
                 type: 'error',
                 text1: 'Login inválido',
-                text2: 'No se pudo conectar con el servidor',
+                text2: error instanceof Error ? error.message : 'No se pudo conectar con el servidor',
             });
             console.error(error);
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <>

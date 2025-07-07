@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import Loader from '@/components/loader';
+import { registerUser } from "@/services/chillastApi";
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -63,43 +64,21 @@ export default function RegisterScreen() {
 
         setLoading(true);
         try {
-            const response = await fetch('https://chillcast-backend.onrender.com/api/v1/auth/register-user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: usuario,
-                    email: email,
-                    password: password,
-                    nombre: nombre,
-                }),
+            await registerUser({
+                username: usuario,
+                email,
+                password,
+                nombre,
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                const mensajeError = data?.error || 'Ocurrió un error inesperado';
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error al registrarse',
-                    text2: mensajeError,
-                });
-                return;
-            }
-
-            const user = data.user[0];
-            await AsyncStorage.setItem('usuario', JSON.stringify(user));
-            await AsyncStorage.setItem('rememberMe', 'true');
-
-
             router.push('/(auth)/generosIniciales');
-
         } catch (error) {
             Toast.show({
                 type: 'error',
-                text1: 'Error de red',
-                text2: 'No se pudo conectar con el servidor',
+                text1: 'Error al registrarse',
+                text2: error instanceof Error ? error.message : 'Error inesperado',
             });
-        }finally {
+        } finally {
             setLoading(false);
         }
     };

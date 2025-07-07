@@ -27,6 +27,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
 import { Swipeable } from 'react-native-gesture-handler'
 import Toast from "react-native-toast-message";
+import Loader from '@/components/loader';
 
 const tabs = ['Favoritos', 'Listas', 'Reseñas', 'Historial']
 
@@ -97,7 +98,7 @@ const MiEspacio = () => {
       });
       return
     }
-
+    setLoading(true);
     try {
       const nuevaLista = await fetchCrearLista({
         username,
@@ -127,6 +128,8 @@ const MiEspacio = () => {
         text1: "Error",
         text2: "No se pudo crear la lista",
       });
+    }finally {
+      setLoading(false);
     }
   }
 
@@ -236,6 +239,7 @@ const MiEspacio = () => {
   }, [selectedListId])
 
   return (
+      <>
     <TouchableWithoutFeedback onPress={handleOutsidePress}>
       <View style={{ flex: 1, backgroundColor: '#232323' }}>
         <View className="px-6" style={{ backgroundColor: '#232323', paddingTop: 50 }}>
@@ -654,6 +658,8 @@ const MiEspacio = () => {
         </Modal>
       </View>
     </TouchableWithoutFeedback>
+        <Loader visible={loading} />
+      </>
   )
 }
 

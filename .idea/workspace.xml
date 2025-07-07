@@ -8,9 +8,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(auth)/generosIniciales.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/generosIniciales.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(auth)/login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/login.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/miEspacio.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/miEspacio.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/profile/info.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/profile/info.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/register.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/register.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/profile/recomendaciones.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/profile/recomendaciones.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/cards/feedCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/cards/feedCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/chillastApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/services/chillastApi.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +86,7 @@
       <workItem from="1750436729867" duration="10843000" />
       <workItem from="1750531429697" duration="5750000" />
       <workItem from="1751833433407" duration="4947000" />
-      <workItem from="1751916476499" duration="694000" />
+      <workItem from="1751916476499" duration="7740000" />
     </task>
     <servers />
   </component>
