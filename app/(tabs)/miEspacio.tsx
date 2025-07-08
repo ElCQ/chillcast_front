@@ -245,39 +245,31 @@ const MiEspacio = () => {
         <View className="px-6" style={{ backgroundColor: '#232323', paddingTop: 50 }}>
           <Text className="text-white text-2xl font-bold mb-6 text-center">Espacio Personal</Text>
           <FilterTabs tabs={tabs} activeTab={tab} setActiveTab={setTab} />
-          <View
-            className="flex-row items-center justify-between mb-6 mt-4 py-2"
-            style={{ minHeight: 40 }}
-          >
-            <View className="flex-row items-center">
-              <FontAwesome name="sliders" size={18} color="#fff" style={{ marginRight: 8 }} />
-              <Text className="text-white font-medium" style={{ fontFamily: 'System' }}>
-                Ordenar y Filtrar
-              </Text>
-            </View>
+          
             {tab === 'Listas' && (
-              <TouchableOpacity
-                className="px-3 py-1 border-2 border-[#A259FF] rounded-full ml-4"
-                activeOpacity={0.8}
-                onPress={() => setModalVisible(true)}
-              >
-                <Text
-                  className="text-white font-bold"
-                  style={{
-                    fontFamily: 'System',
-                    fontWeight: 'bold',
-                    fontSize: 14,
-                  }}
+              <View className="flex-row justify-end mt-4 py-2">
+                <TouchableOpacity
+                  className="px-3 py-1 border-2 border-[#A259FF] rounded-full ml-4"
+                  activeOpacity={0.8}
+                  onPress={() => setModalVisible(true)}
                 >
-                  Crear Lista
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    className="text-white font-bold"
+                    style={{
+                      fontFamily: 'System',
+                      fontWeight: 'bold',
+                      fontSize: 14,
+                    }}
+                  >
+                    Crear Lista
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
-          </View>
         </View>
 
         <ScrollView
-          contentContainerStyle={{ paddingTop: 0, paddingBottom: 30, paddingHorizontal: 24 }}
+          contentContainerStyle={{ paddingTop: 24, paddingBottom: 30, paddingHorizontal: 24 }}
           showsVerticalScrollIndicator={false}
         >
           {/* FAVORITOS */}
