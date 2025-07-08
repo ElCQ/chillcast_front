@@ -20,18 +20,43 @@ const Search = () => {
   const [sortOption, setSortOption] = useState("Orden: Alfabético");
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
-  const [rating, setRating] = useState<number | null>(null);
-  const [providers, setProviders] = useState<string[]>([]);
-  const [userRated, setUserRated] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [releaseDate, setReleaseDate] = useState<string | null>(null);
-  const [country, setCountry] = useState<string | null>(null);
-  const [language, setLanguage] = useState<string | null>(null);
-  const [duration, setDuration] = useState<string | null>(null);
+  const parseArray = (value: string | string[] | undefined): string[] => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") return value.split(",");
+    return [];
+  };
+
+  const parseNumber = (
+    value: string | string[] | undefined
+  ): number | null => {
+    const num = Array.isArray(value)
+      ? parseFloat(value[0])
+      : parseFloat(value ?? "");
+    return isNaN(num) ? null : num;
+  };
+
+  const [rating, setRating] = useState<number | null>(() => parseNumber(params.rating));
+  const [providers, setProviders] = useState<string[]>(() => parseArray(params.providers));
+  const [userRated, setUserRated] = useState<string | null>(
+    () => (typeof params.userRated === "string" ? params.userRated : null)
+  );
+  const [categories, setCategories] = useState<string[]>(() => parseArray(params.categories));
+  const [releaseDate, setReleaseDate] = useState<string | null>(
+    () => (typeof params.releaseDate === "string" ? params.releaseDate : null)
+  );
+  const [country, setCountry] = useState<string | null>(
+    () => (typeof params.country === "string" ? params.country : null)
+  );
+  const [language, setLanguage] = useState<string | null>(
+    () => (typeof params.language === "string" ? params.language : null)
+  );
+  const [duration, setDuration] = useState<string | null>(
+    () => (typeof params.duration === "string" ? params.duration : null)
+  );
+
 
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  const tabs = ["Podcasts", "Episodios"];
   const [activeTab, setActiveTab] = useState("Podcasts");
 
   const [search, setSearch] = useState<string>("");
@@ -65,7 +90,7 @@ const Search = () => {
     setCountry(typeof params.country === "string" ? params.country : null);
     setLanguage(typeof params.language === "string" ? params.language : null);
     setDuration(typeof params.duration === "string" ? params.duration : null);
-  }, []);
+  }, []); 
 
   const handleSearch = (value: string) => {
     setSearch(value);
@@ -87,8 +112,46 @@ const Search = () => {
     country: country || undefined,
     language: language || undefined,
     duracion: duration || undefined,
-    // Add more if needed
   });
+
+  useEffect(() => {
+    const tieneFiltros = (
+      categories.length > 0 ||
+      rating !== null ||
+      providers.length > 0 ||
+      userRated !== null ||
+      releaseDate !== null ||
+      country !== null ||
+      language !== null ||
+      duration !== null
+    );
+
+    setLoading(true);
+
+    if (tieneFiltros) {
+      const filters = buildFilters();
+      fetchPodcastsFilters(filters)
+        .then((res) => setData(res))
+        .catch(setError)
+        .finally(() => setLoading(false));
+    } else {
+      fetchPodcasts({ query: "podcast" })
+        .then((res) => setData(res))
+        .catch(setError)
+        .finally(() => setLoading(false));
+    }
+    
+  }, [
+    categories,
+    rating,
+    providers,
+    userRated,
+    releaseDate,
+    country,
+    language,
+    duration,
+    search
+  ]);
 
   const handleApplyFilters = async () => {
     setLoading(true);
@@ -104,14 +167,6 @@ const Search = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    setLoading(true);
-    fetchPodcasts({ query: "podcast" })
-      .then((res) => setData(res))
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, []);
 
   const toggleSection = (key: string) => {
     setExpandedSections((prev) =>
@@ -372,7 +427,6 @@ const Search = () => {
 
       <View className="w-full h-fit px-6 items-start justify-start">
         <FilterTabs
-          tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />

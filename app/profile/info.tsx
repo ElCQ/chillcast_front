@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   Image,
   StyleSheet,
   Text,
@@ -59,7 +58,7 @@ export default function InfoUsuario() {
               onPress={() => router.back()}
               style={styles.backButton}
             >
-              <Text style={styles.backArrow}>←</Text>
+              <Text style={{ color: "white", fontSize: 18 }}>{"<"}</Text>
             </TouchableOpacity>
           ),
         }}
@@ -103,10 +102,6 @@ const styles = StyleSheet.create({
   backButton: {
     marginLeft: 4,
     padding: 8,
-  },
-  backArrow: {
-    color: "white",
-    fontSize: 20,
   },
   container: {
     flex: 1,
