@@ -1,4 +1,4 @@
-import { Episode, Podcast, User, Lista } from "@/interfaces/interfaces";
+import { Episode, Lista, Podcast, User } from "@/interfaces/interfaces";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const CHILLCAST_CONFIG = {
@@ -639,4 +639,58 @@ export const updateUserGenres = async (generos: string[]) => {
     const errorData = await response.json();
     throw new Error(errorData.message || 'Error al guardar géneros');
   }
+};
+
+//------------------------------------------------------------------------
+// Obtener reseñas (GET)
+
+// TODO: Falta testear e Implementar
+export const fetchPodcastReview = async (id: string) => {
+
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/reseña?podcast=${encodeURIComponent(id)}}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (response.status === 404) {
+    return [];
+  }
+
+  if (!response.ok) {
+    throw new Error("Error fetching listas", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+
+  return data;
+
+}
+
+//------------------------------------------------------------------------
+// Escribir reseña (POST)
+
+// TODO: Falta testear e Implementar
+export const fetchAddPodcastReview = async (id: string) => {
+  const endpoint = `${
+    CHILLCAST_CONFIG.BASE_URL
+  }/api/v1/reseña?podcast=${encodeURIComponent(id)}}`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: CHILLCAST_CONFIG.headers,
+  });
+
+  if (response.status === 404) {
+    return [];
+  }
+
+  if (!response.ok) {
+    throw new Error("Error fetching listas", { cause: response.statusText });
+  }
+
+  const data = await response.json();
+
+  return data;
 };

@@ -2,7 +2,7 @@ import ExpandableSection from '@/components/expandableSection';
 import { Episode } from '@/interfaces/interfaces';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 
 const Informacion = ({ data }: { data: Episode }) => {
   
@@ -36,7 +36,7 @@ const Informacion = ({ data }: { data: Episode }) => {
   };
 
   return (
-    <View className="gap-2">
+    <ScrollView className="gap-2">
       <ExpandableSection titulo="Descripción">
         <Text className="text-white text-sm px-5 py-2 mt-5">
           Titulo: {data.title}
@@ -63,7 +63,7 @@ const Informacion = ({ data }: { data: Episode }) => {
           ))}
         </View>
       </ExpandableSection> */}
-    </View>
+    </ScrollView>
   );
 };
 

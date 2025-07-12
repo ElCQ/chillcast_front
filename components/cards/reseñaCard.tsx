@@ -1,7 +1,6 @@
-import { Icons } from '@/constants/icons';
 import { Reseña } from '@/interfaces/interfaces';
 import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { StarRatingTextSm } from '../starRatingText';
 
 const ReseñaCard = ({data}: {data: Reseña}) => {
@@ -15,22 +14,6 @@ const ReseñaCard = ({data}: {data: Reseña}) => {
         </View>
       </View>
       <Text className="text-gray-300 my-2.5 text-sm">{data.texto}</Text>
-      <View className="flex-row justify-end">
-        <TouchableOpacity className="mr-4">
-          <Image
-            className="size-6"
-            style={{ tintColor: "#797979" }}
-            source={Icons.ThumbsUpIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image
-            className="size-6"
-            style={{ tintColor: "#797979" }}
-            source={Icons.ThumbsDownIcon}
-          />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
