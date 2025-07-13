@@ -1,7 +1,7 @@
-import { Icons } from '@/constants/icons'
-import { Tabs } from 'expo-router'
-import React from 'react'
-import { Image, ImageSourcePropType, View } from 'react-native'
+import { Icons } from '@/constants/icons';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { Image, ImageSourcePropType, View } from 'react-native';
 
 const TabIcon = ({ focused, icon }: { focused: boolean, icon: ImageSourcePropType }) => {
   return (
@@ -42,7 +42,7 @@ const _Layout = () => {
             <Tabs.Screen name="feed" options={{
         title: 'Feed', headerShown: false, tabBarIcon: ({ focused }) => {
           return (
-            <TabIcon focused={focused} icon={Icons.CirclePlusIcon} />
+            <TabIcon focused={focused} icon={Icons.VideoIcon} />
           )
         }
       }} />
