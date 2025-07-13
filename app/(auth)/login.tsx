@@ -1,3 +1,5 @@
+import Loader from '@/components/loader';
+import { loginUser } from "@/services/chillastApi";
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -15,8 +17,6 @@ import {
     View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import Loader from '@/components/loader';
-import { loginUser } from "@/services/chillastApi";
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -165,6 +165,11 @@ export default function LoginScreen() {
                         <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
                             <Text className="text-gray-400 text-center font-inter">
                                 ¿No tenés cuenta? Registrate
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => router.push('/(tabs)/home')}>
+                            <Text className="text-gray-400 text-center font-inter">
+                                Prueba
                             </Text>
                         </TouchableOpacity>
                     </View>

@@ -1,8 +1,13 @@
 import { Episode, Lista, Podcast, User } from "@/interfaces/interfaces";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra;
+const API_URL_DEV = extra?.API_URL_DEV;
+
 
 export const CHILLCAST_CONFIG = {
-    BASE_URL: "https://chillcast-backend.onrender.com",
+    BASE_URL: API_URL_DEV,
     //API_KEY: process.env.NEXT_PUBLIC_CHILLCAST_API_KEY,
     headers: {
         accept: "application/json",
@@ -17,6 +22,9 @@ export const fetchPodcasts = async ({
 }: {
   query?: string;
 }): Promise<Podcast[]> => {
+
+  console.log(CHILLCAST_CONFIG.BASE_URL);
+
 
   const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/podcast`;
 
