@@ -22,23 +22,30 @@ export const fetchPodcasts = async ({
 }: {
   query?: string;
 }): Promise<Podcast[]> => {
+  try {
+    console.log("CHILLCAST_CONFIG.BASE_URL:", CHILLCAST_CONFIG.BASE_URL);
 
-  console.log(CHILLCAST_CONFIG.BASE_URL);
+    const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/podcast`;
+    console.log("Fetching from:", endpoint);
 
+    const response = await fetch(endpoint, {
+      method: "GET",
+      headers: CHILLCAST_CONFIG.headers,
+    });
 
-  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/podcast`;
+    if (!response.ok) {
+      throw new Error("Error fetching podcasts", {
+        cause: response.statusText,
+      });
+    }
 
-  const response = await fetch(endpoint, {
-    method: "GET",
-    headers: CHILLCAST_CONFIG.headers,
-  });
+    const data = await response.json();
+    return data.podcasts;
 
-  if (!response.ok) {
-    throw new Error("Error fetching podcasts", { cause: response.statusText });
+  } catch (error) {
+    console.error("❌ fetchPodcasts error:", error);
+    throw error; // re-throw if needed
   }
-
-  const data = await response.json();
-  return data.podcasts;
 };
 
 //------------------------------------------------------------------------

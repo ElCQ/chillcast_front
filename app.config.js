@@ -38,6 +38,14 @@ export default {
           backgroundColor: "#282828"
         }
       ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
       "expo-font",
       "expo-audio",
       "expo-web-browser"

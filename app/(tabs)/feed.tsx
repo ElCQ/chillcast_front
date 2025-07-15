@@ -81,6 +81,32 @@ const mock: Feed[] = [
       rating: 5,
     },
   },
+    {
+    podcast: {
+      autores: ["Lucas Botta", "Desde Córdoba"],
+      description:
+        "Podcast destinado a la divulgación de los principales eventos y procesos de la Historia de la Humanidad, aptos para todo público. Dictados por el Profesor y Licenciado en Historia, Lucas Botta. Desde Córdoba, Argentina, para todo el mundo.",
+      genero: ["Historia"],
+      id: "6833793e83ef47469bcd779b",
+      _id: "6833793e83ef47469bcd779b",
+      image: "https://i.scdn.co/image/ab6765630000ba8a7675a7e6eb6bdfc030196f14",
+      language: "es",
+      source: "Spotify",
+      title: "Historia en Podcast",
+      feed_url: null,
+    },
+    episode: {
+      _id: "68439a029542adc02f9a8dc6",
+      title: "138. La Inquisición",
+      description: "VISITÁ NUESTRA PÁGINA: historiaenpodcast.com.ar  Este es un episodio más que solicitado por ustedes, en donde nos metemos de lleno al análisis de la Historia de la Inquisición, pasando por sus etapas, sus objetivos, sus crímenes, sus prohibiciones y por qué no también, sus arrepentimientos posteriores. Que lo disfrutes...  Learn more about your ad choices. Visit megaphone.fm/adchoices",
+      duration_ms: 2784470,
+      release_date: "2023-08-12",
+      language: "es",
+      image: "https://i.scdn.co/image/ab6765630000ba8a4e54d239dc8c36e4dd96ba4a",
+      audio_url: "https://podz-content.spotifycdn.com/audio/clips/3ZTrsAwYXdan0uqRgBzVeh/clip_621554_681554.mp3",
+      rating: 4
+    },
+  },
 ];
 
 const Feed = () => {

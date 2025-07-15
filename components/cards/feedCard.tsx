@@ -1,3 +1,4 @@
+import Loader from '@/components/loader';
 import { Episode, Podcast } from "@/interfaces/interfaces";
 import { fetchAddFavorite, fetchDeleteFavorite } from "@/services/chillastApi";
 import { hexToRgba } from "@/utils/colorUtils";
@@ -13,7 +14,6 @@ import { Href, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
-import Loader from '@/components/loader';
 
 type Feed = {
   podcast: Podcast;
@@ -40,7 +40,7 @@ const FeedCard = ({
   const [loading, setLoading] = useState(false);
 
   const player =
-    feed.episode && feed.episode.audio_url
+    feed.episode && feed.episode.audio_url && !feed.episode.audio_url.includes("/episode/")
       ? useAudioPlayer(feed.episode.audio_url)
       : null;
 

@@ -1,13 +1,12 @@
 import Loader from '@/components/loader';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserGenres, updateUserGenres } from '@/services/chillastApi';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
     ScrollView,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 
