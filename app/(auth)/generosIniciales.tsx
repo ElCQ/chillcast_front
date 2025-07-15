@@ -1,16 +1,15 @@
+import Loader from '@/components/loader';
+import { updateUserGenresAPI } from "@/services/chillastApi";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
     Animated,
     ScrollView,
     Text,
     TouchableOpacity
 } from 'react-native';
-import Loader from '@/components/loader';
 import Toast from "react-native-toast-message";
-import { updateUserGenresAPI } from "@/services/chillastApi";
 
 const GENRES = [
     'Noticias', 'Politica', 'Economia', 'Comedia', 'Educativo',

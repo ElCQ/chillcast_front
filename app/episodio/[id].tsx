@@ -1,8 +1,6 @@
-import AddButton from '@/components/buttons/addButton';
 import BackButton from '@/components/buttons/backButton';
 import FilterTabs from '@/components/filterTabs';
 import { StarRatingTextLg } from '@/components/starRatingText';
-import { Icons } from '@/constants/icons';
 import { fetchEpisodeById } from '@/services/chillastApi';
 import useFetch from '@/services/useFetch';
 import { hexToRgba } from '@/utils/colorUtils';
@@ -66,8 +64,8 @@ const Episodio = () => {
               </View>
             </View>
 
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center justify-start gap-5">
+            <View className="flex-row items-center justify-end">
+              {/* <View className="flex-row items-center justify-start gap-5">
                 <AddButton
                   label="Añadir a favoritos"
                   icon={Icons.CirclePlusIcon}
@@ -78,7 +76,7 @@ const Episodio = () => {
                   icon={Icons.FolderPlusIcon}
                   onPress={() => console.log("Añadido a favoritos")}
                 />
-              </View>
+              </View> */}
 
               {"Spotify" === "Spotify" && (
                 <Pressable>

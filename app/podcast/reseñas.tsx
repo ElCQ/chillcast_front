@@ -26,11 +26,21 @@ const Reseñas = ({ data }: { data: Podcast }) => {
   const [filtroTemporal, setFiltroTemporal] = useState<"asc" | "desc" | "reciente" | "viejo" | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
+  // const { data: reseñas, loading, error: reseñasError } = useFetch(() =>
+  //   fetchReviews({podcast: data._id})
+  // );
+
   const reseñas = [
     { _id: "1", nombre: "Juan Pérez", valoracion: 4.7, texto: "Excelente podcast, lo escucho todos los días." },
     { _id: "2", nombre: "Ana Gómez", valoracion: 5, texto: "Muy recomendable, excelente contenido." },
     { _id: "3", nombre: "Carlos López", valoracion: 3.5, texto: "Está bien, pero podría mejorar." },
-    { _id: "4", nombre: "Carlos López", valoracion: 3.5, texto: "Está bien, pero podría mejorar." },
+    { _id: "4", nombre: "Lucía Martínez", valoracion: 4.2, texto: "Me encanta la variedad de temas que abordan." },
+    { _id: "5", nombre: "Pedro Sánchez", valoracion: 2.8, texto: "No es lo que esperaba, pero tiene potencial." },
+    { _id: "6", nombre: "María Fernández", valoracion: 4.9, texto: "¡Uno de mis podcasts favoritos!" },
+    { _id: "7", nombre: "Sofía Torres", valoracion: 3, texto: "Algunos episodios son muy buenos, otros no tanto." },
+    { _id: "8", nombre: "Diego Ramírez", valoracion: 5, texto: "Contenido de calidad y muy entretenido." },
+    { _id: "9", nombre: "Elena Ruiz", valoracion: 4.5, texto: "Siempre aprendo algo nuevo escuchando este podcast." },
+    { _id: "10", nombre: "Miguel Ángel", valoracion: 2, texto: "No me atrapó, pero reconozco el esfuerzo." },
   ];
 
   const filteredReviews = reseñas
@@ -67,14 +77,13 @@ const Reseñas = ({ data }: { data: Podcast }) => {
               else if (option === "Más reciente") setFiltroTemporal("reciente");
               else if (option === "Más viejo") setFiltroTemporal("viejo");
             }}
-            className={`py-3 px-5 rounded-full mb-3 ${
-              (option === "Puntuación ↑" && filtroTemporal === "asc") ||
-              (option === "Puntuación ↓" && filtroTemporal === "desc") ||
-              (option === "Más reciente" && filtroTemporal === "reciente") ||
-              (option === "Más viejo" && filtroTemporal === "viejo")
+            className={`py-3 px-5 rounded-full mb-3 ${(option === "Puntuación ↑" && filtroTemporal === "asc") ||
+                (option === "Puntuación ↓" && filtroTemporal === "desc") ||
+                (option === "Más reciente" && filtroTemporal === "reciente") ||
+                (option === "Más viejo" && filtroTemporal === "viejo")
                 ? "bg-[#A259FF]"
                 : "bg-[#2C2C2E]"
-            }`}
+              }`}
           >
             <Text className="text-white text-base text-center">{option}</Text>
           </TouchableOpacity>
@@ -128,7 +137,7 @@ const Reseñas = ({ data }: { data: Podcast }) => {
               />
               <View className="items-center mb-5">
                 <View className="flex-row mb-1">
-                  {[1,2,3,4,5].map(val => (
+                  {[1, 2, 3, 4, 5].map(val => (
                     <TouchableOpacity key={val} onPress={() => setRating(val)}>
                       <Text
                         style={{

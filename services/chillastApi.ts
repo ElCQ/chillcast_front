@@ -660,9 +660,20 @@ export const updateUserGenres = async (generos: string[]) => {
 // Obtener reseñas (GET)
 
 // TODO: Falta testear e Implementar
-export const fetchPodcastReview = async (id: string) => {
+export const fetchReviews = async (
+  params: { podcast?: string; username?: string }
+) => {
+  // Only one of podcast or username should be present
+  const keys = Object.keys(params).filter((k) => params[k as keyof typeof params]);
+  if (keys.length !== 1) {
+    throw new Error("You must provide either podcast or username, but not both.");
+  }
 
-  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/reseña?podcast=${encodeURIComponent(id)}}`;
+  const query = new URLSearchParams();
+  if (params.podcast) query.append("podcast", params.podcast);
+  if (params.username) query.append("username", params.username);
+
+  const endpoint = `${CHILLCAST_CONFIG.BASE_URL}/api/v1/reviews?${query.toString()}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
@@ -674,27 +685,26 @@ export const fetchPodcastReview = async (id: string) => {
   }
 
   if (!response.ok) {
-    throw new Error("Error fetching listas", { cause: response.statusText });
+    throw new Error("Error fetching reviews", { cause: response.statusText });
   }
 
   const data = await response.json();
-
-  return data;
-
-}
+  return data.reviews;
+};
 
 //------------------------------------------------------------------------
 // Escribir reseña (POST)
 
 // TODO: Falta testear e Implementar
-export const fetchAddPodcastReview = async (id: string) => {
+export const fetchAddPodcastReview = async (id: string, dataReview: {username: string, email: string, comment: string, qualification: string, podcast: string}) => {
   const endpoint = `${
     CHILLCAST_CONFIG.BASE_URL
-  }/api/v1/reseña?podcast=${encodeURIComponent(id)}}`;
+  }/api/v1/reviews?podcast=${encodeURIComponent(id)}}`;
 
   const response = await fetch(endpoint, {
     method: "POST",
     headers: CHILLCAST_CONFIG.headers,
+    body: JSON.stringify(dataReview),
   });
 
   if (response.status === 404) {
@@ -709,3 +719,5 @@ export const fetchAddPodcastReview = async (id: string) => {
 
   return data;
 };
+
+

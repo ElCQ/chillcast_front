@@ -1,4 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loader from '@/components/loader';
+import { registerUser } from "@/services/chillastApi";
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -10,8 +11,6 @@ import {
     View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import Loader from '@/components/loader';
-import { registerUser } from "@/services/chillastApi";
 
 export default function RegisterScreen() {
     const router = useRouter();
